@@ -16,7 +16,9 @@ RUN npm install -g @deepseek-ai/dsh
 # nginx bridges Render's public port to dsh on loopback (see start.sh).
 RUN apt-get update && apt-get install -y --no-install-recommends nginx && rm -rf /var/lib/apt/lists/*
 
-# Persistent DSH_HOME lives on the Render disk (mounted at /data).
+# DSH_HOME is kept in a Supabase Storage bucket across redeploys and sleep/wake
+# cycles — sync.js (invoked from start.sh) restores it on boot and uploads it
+# on a timer, since the free plan's filesystem is ephemeral.
 ENV DSH_HOME=/data
 ENV HOST=0.0.0.0
 
@@ -25,6 +27,7 @@ EXPOSE 3080
 
 COPY start.sh /usr/local/bin/start.sh
 COPY nginx.conf /app/nginx.conf
+COPY sync.js /app/sync.js
 RUN chmod +x /usr/local/bin/start.sh
 
 CMD ["/usr/local/bin/start.sh"]
