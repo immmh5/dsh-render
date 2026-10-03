@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeepSeek Harness — تسجيل الدخول</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: radial-gradient(1200px 620px at 50% -12%, #17213c 0%, #0b0e14 58%) fixed;
+    color: #e6e9f0;
+    font-family: "Segoe UI", "Noto Sans Arabic", "Helvetica Neue", Arial, sans-serif;
+  }
+  .card {
+    width: 100%;
+    max-width: 430px;
+    background: #141926;
+    border: 1px solid #232b3d;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 22px 64px rgba(0, 0, 0, .48);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+  .mark {
+    display: inline-grid; place-items: center;
+    width: 34px; height: 34px; border-radius: 9px;
+    background: linear-gradient(135deg, #4f8cff, #7c5cff);
+    font-size: 13px; font-weight: 800; letter-spacing: .06em;
+  }
+  h1 { font-size: 20px; margin: 18px 0 6px; }
+  .hint { color: #9aa3b2; font-size: 13px; line-height: 1.75; margin: 0 0 18px; }
+  .hint code {
+    background: #0d1220; border: 1px solid #232b3d; border-radius: 5px;
+    padding: 1px 5px; font-size: 12px; font-family: ui-monospace, Consolas, monospace;
+  }
+  .field { display: block; margin-bottom: 14px; }
+  .lbl { display: block; font-size: 12px; color: #9aa3b2; margin-bottom: 6px; }
+  .ctrl { display: flex; gap: 8px; }
+  input {
+    flex: 1; min-width: 0;
+    background: #0d1220; color: #e6e9f0;
+    border: 1px solid #232b3d; border-radius: 10px;
+    padding: 11px 12px; font-size: 14px;
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    outline: none;
+  }
+  input:focus { border-color: #4f8cff; box-shadow: 0 0 0 3px rgba(79, 140, 255, .18); }
+  .toggle {
+    background: #0d1220; color: #9aa3b2;
+    border: 1px solid #232b3d; border-radius: 10px;
+    padding: 0 13px; font-size: 12px; cursor: pointer;
+  }
+  .toggle:hover { color: #e6e9f0; }
+  .submit {
+    width: 100%; margin-top: 4px;
+    background: linear-gradient(135deg, #4f8cff, #7c5cff);
+    color: #fff; border: 0; border-radius: 10px;
+    padding: 12px 16px; font-size: 15px; font-weight: 700; cursor: pointer;
+  }
+  .submit:hover { filter: brightness(1.08); }
+  .submit:disabled { opacity: .65; cursor: default; }
+  .err {
+    margin: 14px 0 0; padding: 10px 12px;
+    background: rgba(255, 107, 107, .10);
+    border: 1px solid rgba(255, 107, 107, .35);
+    color: #ff8585; border-radius: 10px; font-size: 13px; line-height: 1.65;
+  }
+  .foot { color: #9aa3b2; font-size: 12px; margin: 18px 0 0; line-height: 1.7; }
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="brand"><span class="mark">DSH</span> DeepSeek Harness</div>
+  <h1>أدخل كود الأمان</h1>
+  <p class="hint">
+    الكود يتجدّد تلقائياً مع كل إقلاع للخادم. تجده في سجلّات Render ضمن السطر
+    الحاوي على <code>?token=</code>.
+  </p>
+  <form id="form" action="/" method="get" autocomplete="off">
+    <label class="field">
+      <span class="lbl">كود الأمان</span>
+      <span class="ctrl">
+        <input id="code" name="token" type="password" inputmode="text"
+               autocapitalize="off" spellcheck="false" placeholder="M5x8…" required>
+        <button type="button" id="toggle" class="toggle">إظهار</button>
+      </span>
+    </label>
+    <button type="submit" class="submit">دخول</button>
+    <p id="err" class="err" hidden>
+      الكود غير صحيح أو منتهي. انسخ أحدث كود من سجلّات Render وأعد المحاولة.
+    </p>
+  </form>
+  <p class="foot">كل جهاز أو متصفّح يسجّل الدخول بالكود نفسه بشكل مستقلّ — لا حاجة لتسجيل الخروج من جهاز آخر.</p>
+</main>
+<script>
+(function () {
+  var form = document.getElementById('form');
+  var input = document.getElementById('code');
+  var toggle = document.getElementById('toggle');
+  var err = document.getElementById('err');
+
+  // سامح بلصق الرابط كاملاً واستخراج الكود منه فقط.
+  function clean(v) {
+    v = String(v || '').trim();
+    var m = v.match(/[?&]token=([A-Za-z0-9_-]+)/) || v.match(/^token=([A-Za-z0-9_-]+)$/);
+    return m ? m[1] : v;
+  }
+
+  input.addEventListener('paste', function (e) {
+    var t = (e.clipboardData || window.clipboardData).getData('text');
+    var c = clean(t);
+    if (c && c !== t.trim()) { e.preventDefault(); input.value = c; }
+  });
+
+  form.addEventListener('submit', function () {
+    input.value = clean(input.value);
+    var btn = form.querySelector('.submit');
+    btn.disabled = true;
+    btn.textContent = 'جارٍ التحقق…';
+  });
+
+  toggle.addEventListener('click', function () {
+    var show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    toggle.textContent = show ? 'إخفاء' : 'إظهار';
+  });
+
+  // وجود بارامتر token في العنوان وأنا أعرض صفحة الدخول يعني أن الكود لم يصحّ.
+  if (new URLSearchParams(location.search).has('token')) err.hidden = false;
+  input.focus();
+})();
+</script>
+</body>
+</html>

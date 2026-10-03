@@ -28,6 +28,7 @@ EXPOSE 3080
 COPY start.sh /usr/local/bin/start.sh
 COPY nginx.conf /app/nginx.conf
 COPY sync.js /app/sync.js
-RUN chmod +x /usr/local/bin/start.sh
+COPY login/index.html /app/login/index.html
+RUN chmod 644 /app/login/index.html && chmod +x /usr/local/bin/start.sh
 
 CMD ["/usr/local/bin/start.sh"]

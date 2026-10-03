@@ -9,9 +9,14 @@ any device, independent of your local machine.
 
 ## How to log in
 
-dsh's web UI mints a single-use access token at every boot and prints it to the
-server logs — it is the ONLY thing standing between your harness (which can run
-code and read files) and the public internet. Get the current token from:
+There is a dedicated login page at:
+
+    https://dsh-78go.onrender.com/login
+
+dsh's web UI mints a rotating security code (the "launch token") at every boot
+and prints it to the server logs — it is the ONLY thing standing between your
+harness (which can run code and read files) and the public internet. Get the
+current code from:
 
   Render Dashboard → the dsh service → Logs
 
@@ -19,10 +24,24 @@ Look for the line near boot:
 
     dsh web: http://127.0.0.1:13080/?token=XXXXXXXX
 
-Then open `https://dsh-78go.onrender.com/?token=XXXXXXXX` once. That exchanges
-the one-time token for a session cookie; subsequent visits to the plain URL
-work until the cookie expires. Each reboot mints a new token, so bookmark the
-logs page, not a token URL.
+Paste that code into the login page and submit. Under the hood this is exactly
+dsh's native exchange: the form GETs `/?token=<code>`, dsh validates it and
+answers `303 → /` plus a `Set-Cookie`, so the browser ends on the app with a
+session cookie and the token is consumed. The whole flow is dsh's own — no
+custom auth code runs anywhere.
+
+Each reboot mints a new code, so bookmark the **login page** (or the logs
+page), never a token URL. The cookie is valid for 30 days and is bound to the
+public hostname, so it survives redeploys and sleep/wake cycles; the *code*
+does not.
+
+Multiple devices / browsers each paste the same code once and each get their
+own independent cookie — the code is not single-use in the sense of "one
+device only", it is single-use per *exchange* (a fresh boot invalidates the
+old one).
+
+If you submit a wrong or stale code you stay on the login page and it tells
+you so; the app is only reachable through a valid cookie.
 
 ## What is deployed
 
@@ -30,23 +49,51 @@ A clean, current `@deepseek-ai/dsh` from the public npm registry (MIT-licensed),
 booted with the default `web` profile (dsh-base + dsh-web-app). Nothing from
 your local `~/.dsh` was uploaded — this is a fresh install, by design.
 
-## IMPORTANT — it has no model provider yet
+## IMPORTANT — the Models / Settings pages cannot work on a public URL
 
-A fresh dsh has no LLM configured. When you open the UI it will have no provider
-to talk to. You said you would add the rest yourself; this is exactly that step.
-Your options:
+This is NOT a bug and NOT a database problem. It is a deliberate security
+design in dsh (`dsh-client-ui-settings`):
 
-  1. Point it at your FreeLLMAPI gateway (recommended — it is already running
-     and free):
-       Provider route settings in the dsh UI, or edit
-       $DSH_HOME/settings.yaml inside the service, with:
-         baseURL: https://freellmapi-4khz.onrender.com/v1
-         key:     freellmapi-88414600f1f70c36fc13dbea368b3216c2ad6ee5f9655af5
-     (FreeLLMAPI still needs provider keys added on its own dashboard before it
-     can answer — see the FreeLLMAPI notes.)
-  2. Add any OpenAI-compatible provider directly (Atria, OpenRouter, etc.).
+    persistence = ctx.remote.$host.isLoopback ? "host" : "memory"
 
-Settings live in /data (the DSH_HOME) — see the persistence note below.
+The Settings/Models page only loads its provider directory when the page origin
+is loopback (localhost / 127.0.0.1 / [::1]). From `dsh-78go.onrender.com`,
+`isLoopback` is false, so the describe mirror stays in `"memory"` mode and never
+asks the host for the settings document -> `view === undefined` ->
+"settings are unavailable in this browser" / "Loading the provider directory
+failed". `TRUSTED_HOST` does not change this — it only gates the API fence
+(server-side `isTrustedApiRequest`), not the client-side `isLoopback` check.
+Nothing you set in a database or env var will make these UI pages load remotely.
+
+Therefore: **configure providers server-side, never through the UI on Render.**
+
+## IMPORTANT — it has no model provider configured
+
+A fresh dsh has no LLM key. Because the Settings UI is unusable on a public
+origin (see above), the provider is configured through environment variables.
+The DeepSeek plugin resolves, in order:
+  1. credentials service (`inherited(ref)`) -> process env `DEEPSEEK_API_KEY`
+     wins first, before even the credentials file
+  2. `$DSH_HOME/.credentials.yaml`
+  3. project/user `.env`
+and for the endpoint: `settings.yaml baseURL` > `DEEPSEEK_BASE_URL` env >
+`https://api.deepseek.com`.
+
+So the ONLY thing needed to make chat work is one env var with no spaces:
+
+    DEEPSEEK_API_KEY=sk-............
+
+Optional, only if not using the official DeepSeek endpoint:
+
+    DEEPSEEK_BASE_URL=https://openrouter.ai/api/v1
+
+Caveat: if `$DSH_HOME/settings.yaml` already has an `llm-deepseek` section with
+a `baseURL` (e.g. the old FreeLLMAPI one), that value OVERRIDES the env var.
+Check it in the Render shell (`cat /data/settings.yaml`) and delete the
+`llm-deepseek` block, or set `baseURL` there to match the new endpoint. If you
+switch to OpenRouter, the default model catalog (deepseek-flash / deepseek-v4-*
+ids) will not match OpenRouter ids, so also declare the models list in
+settings.yaml.
 
 ## Persistence — Supabase Storage (free tier)
 
@@ -112,8 +159,13 @@ all-interface bind, the container runs nginx as a bridge:
     Render proxy → nginx (0.0.0.0:$PORT) → dsh (127.0.0.1:13080)
 
 nginx also serves /health itself (dsh takes ~25s to boot its plugin tree, and
-Render's health check would otherwise fail the deploy), and preserves the
-WebSocket/SSE upgrade for streaming responses.
+Render's health check would otherwise fail the deploy), serves the static
+/login page (nginx answers 200 there even while dsh is still booting, so the
+login page is the very first thing that becomes reachable on a fresh deploy),
+intercepts dsh's 401 on the exact root `/` to render that same login page
+(scoped to `location = /` so API/SSE 401s elsewhere keep their real status for
+the frontend to handle), and preserves the WebSocket/SSE upgrade for streaming
+responses.
 
 ## Files in the deployment repo
 
