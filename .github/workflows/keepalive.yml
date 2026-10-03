@@ -1,0 +1,37 @@
+# Render's free web services sleep after 15 minutes without inbound HTTP
+# traffic. A cold boot costs ~1-2 minutes (plugin reinstall + profile init),
+# which makes the UI feel broken on the next visit. This pings the service
+# every 10 minutes so it stays warm — GitHub Actions is free for public repos
+# and this workflow uses far less than the monthly allowance.
+name: keepalive
+
+on:
+  schedule:
+    # Every 10 minutes. GitHub treats this as UTC and delays scheduled runs
+    # under load, which is fine — the sleep window is 15 minutes.
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping dsh
+        run: |
+          for attempt in 1 2 3; do
+            status=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$HEALTH_URL" || status=000)
+            echo "attempt $attempt: HTTP $status"
+            # 401 is healthy: dsh's trust fence rejects anonymous API calls but
+            # it proves the service is up and serving through nginx.
+            if [ "$status" = "200" ] || [ "$status" = "401" ]; then
+              echo "service is warm"
+              exit 0
+            fi
+            sleep 20
+          done
+          # Non-fatal: a single missed ping is not worth failing the run for,
+          # and a failure would just spam the repo's maintainers.
+          echo "service did not respond after 3 attempts"
+          exit 0
+        env:
+          HEALTH_URL: ${{ secrets.DSH_HEALTH_URL }}
