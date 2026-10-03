@@ -48,7 +48,7 @@ Your options:
 
 Settings live in /data (the DSH_HOME) — see the persistence note below.
 
-## Persistence — free plan caveat
+## Persistence — Supabase Storage (free tier)
 
 This service is on the free plan, which has NO persistent disk. Everything dsh
 writes (settings, providers, sessions, conversation history, skills) lives in
@@ -56,11 +56,42 @@ the container's filesystem and is WIPED on every:
   - redeploy (auto-deploy fires on every push to main)
   - sleep/wake (free services sleep after ~15 min of inactivity)
 
-So expect to re-add your provider keys after each update. Two ways to stop that:
+To survive this, `sync.js` mirrors /data into a Supabase Storage bucket:
 
-  1. Upgrade to Starter ($7/mo) and attach a persistent disk at /data —
-     settings and sessions then survive redeploys and sleep.
-  2. Keep the free plan but re-apply settings after each deploy.
+  Project:  jzuppyvyhcigmbwcwemn
+  Bucket:   dsh-data
+  Keys are in the service's env vars (SUPABASE_URL / SUPABASE_SERVICE_KEY /
+  SUPABASE_BUCKET).
+
+The lifecycle in start.sh:
+
+  1. Restore  — on boot, BEFORE dsh starts, sync.js downloads everything under
+                /data from the bucket. Boots are therefore stateful.
+  2. Upload   — a background loop runs `sync.js sync` every 60s, so the bucket
+                tracks what dsh is writing. A hard kill can lose at most ~60s.
+  3. SIGTERM  — on a graceful redeploy, one final sync runs before the old
+                container is replaced.
+
+The marker file `data/.snapshot_marker` holds the timestamp of the last upload.
+It is restored-skipped (it only exists to distinguish "empty bucket, fresh
+install" from "nothing synced yet"), and `logs/` / `node_modules` / sqlite
+sidecar files are excluded so the bucket stays small and fast.
+
+NOTE on file modes: dsh refuses to boot if /data/.credentials.yaml is
+group/world readable. Supabase does not store unix modes, so sync.js restores
+dotfiles + yaml/json as 0600 and everything else as 0644. If you add a new
+secret to /data by hand inside the container, `chmod 600` it.
+
+If Supabase is ever unreachable the service still boots — restore failures are
+non-fatal and it falls back to a fresh empty /data.
+
+## Keeping the service awake
+
+Free services sleep after ~15 min of no inbound traffic. `.github/workflows/
+keepalive.yml` is a GitHub Actions cron that curls the URL every 10 minutes
+(secret `DSH_HEALTH_URL` in the repo). A 401 counts as healthy — dsh's trust
+fence rejects anonymous API calls, but the response proves nginx and dsh are
+both serving. Runs are ~30s of compute each, far under the free Actions quota.
 
 ## Automatic updates (same pattern as FreeLLMAPI)
 
@@ -86,6 +117,8 @@ WebSocket/SSE upgrade for streaming responses.
 
 ## Files in the deployment repo
 
-  Dockerfile   — node:22-slim + pnpm + git + build tools, npm-installs dsh
-  start.sh     — boots dsh on loopback, supervises it, starts nginx
-  nginx.conf   — the reverse proxy + /health endpoint (port placeholders)
+  Dockerfile                  — node:22-slim + pnpm + git + build tools, npm-installs dsh
+  start.sh                    — restores /data, boots dsh on loopback, supervises it, syncs, starts nginx
+  nginx.conf                  — the reverse proxy + /health endpoint (port placeholders)
+  sync.js                     — the Supabase Storage sync (restore / sync-up / marker)
+  .github/workflows/keepalive.yml — cron pinging the URL so it does not sleep
