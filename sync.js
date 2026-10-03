@@ -10,7 +10,7 @@
 // keys the project exposes are a different credential pair, while the REST API
 // works with the project's own service key.
 
-import { createWriteStream, createReadStream, readFileSync, writeFileSync, statSync } from 'node:fs';
+import { createWriteStream, createReadStream, readFileSync, writeFileSync, statSync, chmodSync as chmod } from 'node:fs';
 import { join, dirname, relative, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
@@ -28,12 +28,15 @@ if (!URL || !KEY || !BUCKET) {
 const API = `${URL}/storage/v1`;
 const MARKER_KEY = `${PREFIX}.snapshot_marker`;
 
-// Regenerable/heavy trees — never transfer them.
+// Regenerable/heavy trees — never transfer them. logs/ holds a startup
+// diagnostic file per boot attempt; with the crash-loop before the chmod fix
+// this grew fast, and they carry no state worth persisting across redeploys.
 const SKIP = [
   /(^|\/)node_modules(\/|$)/,
   /(^|\/)\.pnpm(\/|$)/,
   /(^|\/)cache(\/|$)/,
   /(^|\/)\.cache(\/|$)/,
+  /(^|\/)logs(\/|$)/,
   /-wal$/,
   /-shm$/,
   /\.lock$/,
@@ -115,8 +118,23 @@ async function restore() {
       continue;
     }
     const buf = Buffer.from(await res.arrayBuffer());
-    writeFileSync(dest, buf);
+    writeFileSync(dest, buf, { mode: 0o600 });
     count++;
+  }
+  // Storage does not carry unix modes, so set them explicitly here. dsh refuses
+  // to boot when .credentials.yaml is group/world readable, and restored files
+  // otherwise land at 644 (the umask default of the node fs API).
+  for (const name of names) {
+    const rel = name.slice(PREFIX.length);
+    if (!rel || skip(rel)) continue;
+    const dest = join(HOME, rel);
+    try {
+      if (rel.startsWith('.') || rel.endsWith('.yaml') || rel.endsWith('.yml') || rel.endsWith('.json')) {
+        chmod(dest, 0o600);
+      } else {
+        chmod(dest, 0o644);
+      }
+    } catch { /* missing file already reported above */ }
   }
   console.log(`[sync] restored ${count} file(s)`);
 }
