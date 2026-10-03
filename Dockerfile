@@ -28,6 +28,7 @@ EXPOSE 3080
 COPY start.sh /usr/local/bin/start.sh
 COPY nginx.conf /app/nginx.conf
 COPY sync.js /app/sync.js
+COPY sanitize-settings.mjs /app/sanitize-settings.mjs
 COPY login/index.html /app/login/index.html
 RUN chmod 644 /app/login/index.html && chmod +x /usr/local/bin/start.sh
 

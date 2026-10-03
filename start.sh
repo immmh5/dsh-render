@@ -37,6 +37,12 @@ else
   echo "[dsh] Supabase not configured; starting with ephemeral storage"
 fi
 
+# Clamp model maxTokens to each provider's real limit. A restored snapshot can
+# carry an oversized value (Atria rejects anything above 65536 and fails the
+# whole turn with "max_tokens must be an integer between 1 and 65536").
+echo "[dsh] sanitizing settings"
+node /app/sanitize-settings.mjs || true
+
 boot_dsh() {
   if [ -n "$TRUSTED" ]; then
     exec dsh web --host 127.0.0.1 --port "$DSH_PORT" --no-open --trusted-host "$TRUSTED"
