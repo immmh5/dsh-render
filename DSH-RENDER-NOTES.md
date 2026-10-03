@@ -95,6 +95,26 @@ switch to OpenRouter, the default model catalog (deepseek-flash / deepseek-v4-*
 ids) will not match OpenRouter ids, so also declare the models list in
 settings.yaml.
 
+## IMPORTANT — maxTokens must not exceed the provider's limit
+
+A restored settings.yaml can carry a model `maxTokens` larger than its provider
+accepts. This is easy to hit: the values are per-model, and a snapshot written
+under one provider's limit (or hand-edited) is restored verbatim. The failure
+is loud but confusing — Atria answers any `max_tokens` above 65536 with
+
+    400: max_tokens must be an integer between 1 and 65536.
+
+and the agent loop surfaces it as `provider_bad_request` for the whole turn,
+so a chat that should work looks like the model is broken when only the limit
+is wrong.
+
+`sanitize-settings.mjs` (run from start.sh after the restore, before dsh boots)
+clamps each listed provider's models to its real ceiling. Add a provider to
+`CEILINGS` there when you wire one with a smaller limit than 131072. It is
+idempotent and never fails the boot — a bad or missing settings.yaml is a
+no-op, and the file keeps its original mode (dsh refuses group-readable
+config).
+
 ## Persistence — Supabase Storage (free tier)
 
 This service is on the free plan, which has NO persistent disk. Everything dsh
@@ -170,7 +190,8 @@ responses.
 ## Files in the deployment repo
 
   Dockerfile                  — node:22-slim + pnpm + git + build tools, npm-installs dsh
-  start.sh                    — restores /data, boots dsh on loopback, supervises it, syncs, starts nginx
+  start.sh                    — restores /data, sanitizes settings, boots dsh on loopback, supervises it, syncs, starts nginx
   nginx.conf                  — the reverse proxy + /health endpoint (port placeholders)
   sync.js                     — the Supabase Storage sync (restore / sync-up / marker)
+  sanitize-settings.mjs       — clamps model maxTokens to each provider's real limit before dsh boots
   .github/workflows/keepalive.yml — cron pinging the URL so it does not sleep
