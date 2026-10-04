@@ -68,6 +68,22 @@ install_profile() {
 
 install_profile
 
+# DIAGNOSTIC (0.1.5-rc.2 pin): the pinned runtime fails at boot with
+# "plugin(s) failed to load: @deepseek-ai/dsh-sandbox-local ... could not be
+# resolved", and cordis swallows the underlying cause. Load the package the
+# same way the plugin loader does, so the real error reaches the log stream.
+echo "[dsh] diag: probing dsh-sandbox-local"
+node -e '
+const base = "/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai";
+for (const p of ["dsh-sandbox-local", "dsh-sandbox-windows-acl", "dsh-win32-process"]) {
+  try { require(`${base}/${p}`); console.log(`[dsh] diag: ${p} OK`); }
+  catch (e) { console.log(`[dsh] diag: ${p} FAIL -> ${e && e.message}`); }
+}
+try { require.resolve("koffi", { paths: [`${base}/dsh-sandbox-windows-acl`] }); console.log("[dsh] diag: koffi OK"); }
+catch (e) { console.log(`[dsh] diag: koffi FAIL -> ${e && e.message}`); }
+' 2>&1 || true
+echo "[dsh] diag: node $(node -v), $(uname -m)"
+
 boot_dsh() {
   if [ -n "$TRUSTED" ]; then
     exec dsh web --host 127.0.0.1 --port "$DSH_PORT" --no-open --trusted-host "$TRUSTED"
