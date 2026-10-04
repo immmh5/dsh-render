@@ -16,7 +16,14 @@ RUN apt-get update \
 # both refuse it on peer ranges and break its mount with
 # "ctx.settings.register is not a function" once exempted. Pin until the
 # plugin publishes a release compatible with a newer dsh.
-RUN npm install -g @deepseek-ai/dsh@0.1.5-rc.2
+#
+# npm is bumped to 12 first: the node:22 image ships npm 10.9.9, whose global
+# installer silently drops transitive deps of *nested* packages (dsh-base's
+# dsh-sandbox-local / dsh-sandbox-windows-acl / dsh-win32-process never land in
+# node_modules). dsh then dies at boot with "dsh-sandbox-local ... could not be
+# resolved". npm 12 installs the full tree.
+RUN npm install -g npm@12.2.0 \
+  && npm install -g @deepseek-ai/dsh@0.1.5-rc.2
 
 # nginx bridges Render's public port to dsh on loopback (see start.sh).
 RUN apt-get update && apt-get install -y --no-install-recommends nginx && rm -rf /var/lib/apt/lists/*

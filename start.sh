@@ -68,35 +68,22 @@ install_profile() {
 
 install_profile
 
-# DIAGNOSTIC (0.1.5-rc.2 pin): the pinned runtime fails at boot with
-# "plugin(s) failed to load: @deepseek-ai/dsh-sandbox-local ... could not be
-# resolved", and cordis swallows the underlying cause. Load the package the
-# same way the plugin loader does, so the real error reaches the log stream.
-echo "[dsh] diag: probing dsh-sandbox-local"
-ROOT=/usr/local/lib/node_modules
-node -e '
-const fs = require("fs"), path = require("path");
-const root = "/usr/local/lib/node_modules";
-const target = "dsh-sandbox-local";
-const found = [];
-function scan(dir, depth) {
-  if (depth > 4 || found.length > 8) return;
-  let ents; try { ents = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
-  for (const e of ents) {
-    if (e.name === "node_modules") continue;
-    const full = path.join(dir, e.name);
-    if (e.name === target) { found.push(path.dirname(full)); continue; }
-    if (e.isDirectory()) scan(full, depth + 1);
-  }
-}
-scan(root, 0);
-console.log("[dsh] diag: dsh-sandbox-local found at:", found.length ? found.join(", ") : "NOWHERE under /usr/local/lib/node_modules");
-const dnm = path.join(root, "@deepseek-ai/dsh/node_modules/@deepseek-ai");
-try { console.log("[dsh] diag: nested @deepseek-ai count:", fs.readdirSync(dnm).length); } catch (e) { console.log("[dsh] diag: nested dir missing:", e.message); }
-' 2>&1 || true
-echo "[dsh] diag: npm $(npm -v), node $(node -v), $(uname -m)"
-echo "[dsh] diag: installed dsh version: $(node -e 'try{console.log(require("/usr/local/lib/node_modules/@deepseek-ai/dsh/package.json").version)}catch(e){console.log("?",e.message)}')"
-echo "[dsh] diag: nested list: $(ls /usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/ 2>/dev/null | tr '\n' ' ')"
+# Verify the runtime tree is complete. Render's node:22 image ships npm
+# 10.9.9, whose global installer silently dropped transitive deps of nested
+# packages (dsh-base's dsh-sandbox-local and its deps), and dsh then died at
+# boot with "dsh-sandbox-local ... could not be resolved". The Dockerfile bumps
+# npm to 12.2.0, which installs the full tree; this check proves it at boot and
+# self-heals (local install into dsh's own node_modules) if a package is still
+# absent, rather than hard-failing the profile.
+G=/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai
+for p in dsh-sandbox-local dsh-sandbox-windows-acl dsh-win32-process; do
+  if [ ! -d "$G/$p" ]; then
+    echo "[dsh] WARNING: $p missing from global tree; installing locally"
+    npm install --prefix "/usr/local/lib/node_modules/@deepseek-ai/dsh" --no-audit --no-fund --no-save "@deepseek-ai/$p@0.1.5-rc.2" || true
+  fi
+done
+echo "[dsh] verify: $(node -e 'const fs=require("fs");const g="/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai";const w=["dsh-sandbox-local","dsh-sandbox-windows-acl","dsh-win32-process"];console.log(w.map(x=>x+":"+(fs.existsSync(g+"/"+x)?"ok":"MISSING")).join(" "))')]"
+echo "[dsh] verify: npm $(npm -v), node $(node -v), dsh $(node -e 'try{console.log(require("/usr/local/lib/node_modules/@deepseek-ai/dsh/package.json").version)}catch(e){console.log("?")}')"
 
 boot_dsh() {
   if [ -n "$TRUSTED" ]; then
