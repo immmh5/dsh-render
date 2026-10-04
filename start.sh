@@ -95,6 +95,8 @@ const dnm = path.join(root, "@deepseek-ai/dsh/node_modules/@deepseek-ai");
 try { console.log("[dsh] diag: nested @deepseek-ai count:", fs.readdirSync(dnm).length); } catch (e) { console.log("[dsh] diag: nested dir missing:", e.message); }
 ' 2>&1 || true
 echo "[dsh] diag: npm $(npm -v), node $(node -v), $(uname -m)"
+echo "[dsh] diag: installed dsh version: $(node -e 'try{console.log(require("/usr/local/lib/node_modules/@deepseek-ai/dsh/package.json").version)}catch(e){console.log("?",e.message)}')"
+echo "[dsh] diag: nested list: $(ls /usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/ 2>/dev/null | tr '\n' ' ')"
 
 boot_dsh() {
   if [ -n "$TRUSTED" ]; then
