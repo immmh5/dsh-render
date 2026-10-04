@@ -17,13 +17,19 @@ RUN apt-get update \
 # "ctx.settings.register is not a function" once exempted. Pin until the
 # plugin publishes a release compatible with a newer dsh.
 #
-# npm is bumped to 12 first: the node:22 image ships npm 10.9.9, whose global
-# installer silently drops transitive deps of *nested* packages (dsh-base's
-# dsh-sandbox-local / dsh-sandbox-windows-acl / dsh-win32-process never land in
-# node_modules). dsh then dies at boot with "dsh-sandbox-local ... could not be
-# resolved". npm 12 installs the full tree.
+# The node:22 image ships npm 10.9.9, whose global installer silently drops
+# transitive deps of *nested* packages — dsh-base's dsh-sandbox-local and its
+# deps never land in node_modules, and dsh then dies at boot with
+# "dsh-sandbox-local ... could not be resolved". npm 12 also drops them when
+# they're only reached transitively, so the three packages are installed
+# explicitly at the top level of the global tree. That is resolvable by the
+# same node_modules walk-up dsh uses for its nested copies: the global root
+# /usr/local/lib/node_modules is itself a node_modules directory.
 RUN npm install -g npm@12.2.0 \
-  && npm install -g @deepseek-ai/dsh@0.1.5-rc.2
+  && npm install -g @deepseek-ai/dsh@0.1.5-rc.2 \
+  && npm install -g @deepseek-ai/dsh-sandbox-local@0.1.5-rc.2 \
+  && npm install -g @deepseek-ai/dsh-sandbox-windows-acl@0.1.5-rc.2 \
+  && npm install -g @deepseek-ai/dsh-win32-process@0.1.5-rc.2
 
 # nginx bridges Render's public port to dsh on loopback (see start.sh).
 RUN apt-get update && apt-get install -y --no-install-recommends nginx && rm -rf /var/lib/apt/lists/*

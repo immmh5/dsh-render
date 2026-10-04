@@ -68,21 +68,21 @@ install_profile() {
 
 install_profile
 
-# Verify the runtime tree is complete. Render's node:22 image ships npm
-# 10.9.9, whose global installer silently dropped transitive deps of nested
-# packages (dsh-base's dsh-sandbox-local and its deps), and dsh then died at
-# boot with "dsh-sandbox-local ... could not be resolved". The Dockerfile bumps
-# npm to 12.2.0, which installs the full tree; this check proves it at boot and
-# self-heals (local install into dsh's own node_modules) if a package is still
-# absent, rather than hard-failing the profile.
+# Verify the runtime tree is complete. dsh resolves its nested plugins by
+# walking up from /usr/local/lib/node_modules, so a top-level global install
+# of any missing package is resolvable the same way its own nested copy would
+# be. (Installing into dsh's own dir with --prefix does NOT work: npm then
+# re-resolves dsh's devDependencies and aborts with ERESOLVE.)
 G=/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai
+T=/usr/local/lib/node_modules/@deepseek-ai
 for p in dsh-sandbox-local dsh-sandbox-windows-acl dsh-win32-process; do
-  if [ ! -d "$G/$p" ]; then
-    echo "[dsh] WARNING: $p missing from global tree; installing locally"
-    npm install --prefix "/usr/local/lib/node_modules/@deepseek-ai/dsh" --no-audit --no-fund --no-save "@deepseek-ai/$p@0.1.5-rc.2" || true
+  if [ ! -d "$G/$p" ] && [ ! -d "$T/$p" ]; then
+    echo "[dsh] WARNING: $p missing; installing globally"
+    npm install -g --no-audit --no-fund "%%40deepseek-ai%%2f$p@0.1.5-rc.2" >/dev/null 2>&1 \
+      || npm install -g --no-audit --no-fund "@deepseek-ai/$p@0.1.5-rc.2" || true
   fi
 done
-echo "[dsh] verify: $(node -e 'const fs=require("fs");const g="/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai";const w=["dsh-sandbox-local","dsh-sandbox-windows-acl","dsh-win32-process"];console.log(w.map(x=>x+":"+(fs.existsSync(g+"/"+x)?"ok":"MISSING")).join(" "))')]"
+echo "[dsh] verify: $(node -e 'const fs=require("fs");const g="/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai";const t="/usr/local/lib/node_modules/@deepseek-ai";const w=["dsh-sandbox-local","dsh-sandbox-windows-acl","dsh-win32-process"];console.log(w.map(x=>x+":"+(fs.existsSync(g+"/"+x)||fs.existsSync(t+"/"+x)?"ok":"MISSING")).join(" "))')]"
 echo "[dsh] verify: npm $(npm -v), node $(node -v), dsh $(node -e 'try{console.log(require("/usr/local/lib/node_modules/@deepseek-ai/dsh/package.json").version)}catch(e){console.log("?")}')"
 
 boot_dsh() {
