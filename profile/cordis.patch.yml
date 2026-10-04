@@ -1,0 +1,18 @@
+# telegram-duty configuration for the Render deployment.
+#
+# The bot token never lives in this repo: it is read from the environment at
+# boot time via the !!js tag (set TELEGRAM_DUTY_TOKEN in Render's dashboard).
+#
+# `poll` is intentionally absent: the pristine npm package has no such field,
+# and its schema default is to poll, so this instance owns the getUpdates
+# queue. The local machine sets poll:false in its own cordis.patch.yml, which
+# is why the two can coexist without a 409 Conflict.
+
+- id: telegram-duty
+  config:
+    token: !!js process.env.TELEGRAM_DUTY_TOKEN
+    chatId: 8939516904
+    language: en
+    watchMode: duty
+    dataDir: /data/storages/telegram-duty
+    dutyCwd: /workspace

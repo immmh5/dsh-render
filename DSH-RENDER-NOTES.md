@@ -187,11 +187,69 @@ intercepts dsh's 401 on the exact root `/` to render that same login page
 the frontend to handle), and preserves the WebSocket/SSE upgrade for streaming
 responses.
 
+## The `telegram-duty` bot and the 409 Conflict
+
+`@luzhengyangtx/dsh-telegram-duty` is installed as a third-party plugin in the
+web profile. It is the Telegram bridge that reaches your phone.
+
+**The 409 Conflict is the one trap here.** Telegram's Bot API returns
+`409 Conflict: terminated by other getUpdates request` whenever *two* processes
+long-poll the same bot token — it is an account-wide lock, one consumer per bot.
+Local `dsh` and Render both run this plugin, so they MUST NOT both poll. This is
+solved by a repo convention, not by a flag in a config file:
+
+  - **Render** uses the pristine npm package (v0.5.0), whose schema has **no**
+    `poll` field at all — adding one fails validation. Its default is to poll,
+    so Render owns the queue. The profile in this repo therefore OMITS `poll`.
+  - **Local** runs a patched plugin (in `plugins-src/` on your machine) that
+    adds `poll` to the schema, and the local `cordis.patch.yml` sets
+    `poll: false`. Local watches/webhooks only, never long-polls.
+
+Never set `poll: true` locally, and never add a `poll:` line to
+`profile/cordis.patch.yml` (it would crash the boot with a schema error — the
+npm package does not know the field). If both instances ever seem to fight over
+the bot, the fix is always: local `poll: false`, Render no `poll` key at all.
+
+## The web profile lives in this repo (`profile/`)
+
+The web profile is defined in the repo, not in the container — it is the single
+source of truth for which plugins the Render instance loads:
+
+    profile/package.json      — the profile manifest: bundles list + name
+    profile/cordis.patch.yml  — the `telegram-duty` plugin config (chat id, dirs)
+
+Both are copied into `$DSH_HOME/profiles/web/` by `install_profile()` in
+start.sh, which runs *after* the Supabase restore. `profiles/` is in the SKIP
+list of sync.js, so the bucket never contains a `profiles/` snapshot and a
+restore can never clobber the repo definition. The plugin itself is installed
+at **image build time** (`COPY profile/package.json` → `pnpm install`) into
+`/opt/dsh-profile`, then `install_profile` copies `node_modules/` in at boot —
+the free plan's container has a fragile network, and a boot-time npm fetch
+(plus its native-build step) is exactly the kind of thing that fails there.
+
+**The bot token is NEVER committed.** In `cordis.patch.yml` it is written as
+
+    token: !!js process.env.TELEGRAM_DUTY_TOKEN
+
+dsh's YAML loader resolves the `!!js` tag at boot into
+`process.env.TELEGRAM_DUTY_TOKEN`, and the token only ever exists in Render's
+dashboard env vars. (The `role("secret")` redaction you may see in dsh's own
+settings applies only to what the LLM/API output — the runtime value stays
+intact, so the bot does receive a real token.) The chat id is a public value
+and is committed as a literal.
+
+The `@deepseek-ai/*` packages are NOT in the profile's `dependencies` on
+purpose: dsh supplies them at boot via its module-fallback symlinks (host
+copy), which also guarantees only one copy of each loads — a duplicate copy
+makes two distinct `Symbol()` registries and breaks tool scheduling.
+
 ## Files in the deployment repo
 
   Dockerfile                  — node:22-slim + pnpm + git + build tools, npm-installs dsh
-  start.sh                    — restores /data, sanitizes settings, boots dsh on loopback, supervises it, syncs, starts nginx
+  start.sh                    — restores /data, sanitizes settings, installs the profile, boots dsh, syncs, nginx
   nginx.conf                  — the reverse proxy + /health endpoint (port placeholders)
   sync.js                     — the Supabase Storage sync (restore / sync-up / marker)
   sanitize-settings.mjs       — clamps model maxTokens to each provider's real limit before dsh boots
+  profile/package.json        — the web profile manifest (bundles list)
+  profile/cordis.patch.yml    — telegram-duty config; token via !!js process.env
   .github/workflows/keepalive.yml — cron pinging the URL so it does not sleep

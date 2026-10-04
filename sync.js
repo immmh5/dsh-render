@@ -31,7 +31,12 @@ const MARKER_KEY = `${PREFIX}.snapshot_marker`;
 // Regenerable/heavy trees — never transfer them. logs/ holds a startup
 // diagnostic file per boot attempt; with the crash-loop before the chmod fix
 // this grew fast, and they carry no state worth persisting across redeploys.
+// profiles/ is defined by this repo (package.json + cordis.patch.yml, token via
+// !!js process.env) and installed fresh on every boot, so it is both excluded
+// from restore (never clobbers the repo's definition) and from upload (never
+// uploads node_modules or stale profile state).
 const SKIP = [
+  /(^|\/)profiles(\/|$)/,
   /(^|\/)node_modules(\/|$)/,
   /(^|\/)\.pnpm(\/|$)/,
   /(^|\/)cache(\/|$)/,
@@ -146,6 +151,7 @@ async function syncUp() {
   const files = walk(HOME);
   let count = 0;
   let failed = 0;
+  let skipped = 0;
   for (const abs of files) {
     const rel = relative(HOME, abs).split(sep).join('/');
     if (skip(rel)) continue; // .snapshot_marker IS uploaded: restore looks for it

@@ -25,11 +25,22 @@ ENV HOST=0.0.0.0
 WORKDIR /workspace
 EXPOSE 3080
 
+# Pre-install the web profile's third-party plugins at image build time. The
+# free plan's container is ephemeral and a boot-time install is slow/fragile,
+# so /opt/dsh-profile is baked here and start.sh copies it into $DSH_HOME on
+# boot. dsh's own @deepseek-ai/* packages are supplied via the module-fallback
+# symlinks created at boot, so only third-party deps live here.
+COPY profile/package.json /opt/dsh-profile/package.json
+RUN cd /opt/dsh-profile \
+  && pnpm install --no-frozen-lockfile --prod \
+  && rm -rf /opt/dsh-profile/node_modules/.pnpm-store
+
 COPY start.sh /usr/local/bin/start.sh
 COPY nginx.conf /app/nginx.conf
 COPY sync.js /app/sync.js
 COPY sanitize-settings.mjs /app/sanitize-settings.mjs
 COPY login/index.html /app/login/index.html
+COPY profile/cordis.patch.yml /app/profile/cordis.patch.yml
 RUN chmod 644 /app/login/index.html && chmod +x /usr/local/bin/start.sh
 
 CMD ["/usr/local/bin/start.sh"]

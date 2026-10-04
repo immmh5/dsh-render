@@ -43,6 +43,29 @@ fi
 echo "[dsh] sanitizing settings"
 node /app/sanitize-settings.mjs || true
 
+# Materialize the web profile. This repo is the single source of truth for the
+# profile definition (package.json + cordis.patch.yml, token via the !!js tag,
+# so no secret is committed). profiles/ is excluded from the Supabase sync in
+# both directions, so a restored snapshot can never clobber it. The
+# @deepseek-ai/* packages are supplied by dsh's own module-fallback symlinks
+# created at boot; the third-party plugin (telegram-duty) was installed at
+# image build time under /opt/dsh-profile and is copied in here.
+install_profile() {
+  local target="$DSH_HOME/profiles/web"
+  mkdir -p "$target"
+  cp -f /app/profile/package.json "$target/package.json"
+  cp -f /app/profile/cordis.patch.yml "$target/cordis.patch.yml"
+  if [ -d /opt/dsh-profile/node_modules ]; then
+    rm -rf "$target/node_modules"
+    cp -a /opt/dsh-profile/node_modules "$target/node_modules"
+  else
+    echo "[dsh] WARNING: /opt/dsh-profile/node_modules missing; plugins will not load"
+  fi
+  echo "[dsh] profile installed (telegram-duty: $(test -e "$target/node_modules/@luzhengyangtx/dsh-telegram-duty" && echo present || echo MISSING))"
+}
+
+install_profile
+
 boot_dsh() {
   if [ -n "$TRUSTED" ]; then
     exec dsh web --host 127.0.0.1 --port "$DSH_PORT" --no-open --trusted-host "$TRUSTED"

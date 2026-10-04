@@ -1,0 +1,17 @@
+{
+  "name": "dsh-profile-web",
+  "private": true,
+  "dependencies": {
+    "@luzhengyangtx/dsh-telegram-duty": "^0.5.0"
+  },
+  "dsh": {
+    "profile": {
+      "bundles": [
+        "@deepseek-ai/dsh-base",
+        "@deepseek-ai/dsh-web-app",
+        "@luzhengyangtx/dsh-telegram-duty"
+      ],
+      "patchReload": "live"
+    }
+  }
+}
