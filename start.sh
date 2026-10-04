@@ -50,16 +50,13 @@ node /app/sanitize-settings.mjs || true
 # @deepseek-ai/* packages are supplied by dsh's own module-fallback symlinks
 # created at boot; the third-party plugin (telegram-duty) was installed at
 # image build time under /opt/dsh-profile and is copied in here.
-# pinned exact version to install, not a range). dsh 0.2.0-rc.2 gates plugins
-# on peerDependencies, and dsh-telegram-duty@0.5.0 predates it, so it is
-# refused without an exact-version exemption. compatibility.json lives here
-# and is installed with the profile; dsh reads it from the profile directory.
+# dsh is pinned to 0.1.5-rc.2 (see Dockerfile) — the runtime the plugin's
+# peers declare — so no compatibility exemption file is needed here.
 install_profile() {
   local target="$DSH_HOME/profiles/web"
   mkdir -p "$target"
   cp -f /app/profile/package.json "$target/package.json"
   cp -f /app/profile/cordis.patch.yml "$target/cordis.patch.yml"
-  cp -f /app/profile/compatibility.json "$target/compatibility.json" || echo "[dsh] no compatibility.json bundled; plugins may be gated by peer ranges"
   if [ -d /opt/dsh-profile/node_modules ]; then
     rm -rf "$target/node_modules"
     cp -a /opt/dsh-profile/node_modules "$target/node_modules"
