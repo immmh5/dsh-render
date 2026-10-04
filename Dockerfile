@@ -10,8 +10,11 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/* \
   && corepack enable && corepack prepare pnpm@11.26.0 --activate
 
-# Install the dsh CLI globally from the public npm registry.
-RUN npm install -g @deepseek-ai/dsh
+# Install the dsh CLI globally from the public npm registry. Pinned: the
+# profile's compatibility.json grants a version exemption for an exact dsh
+# runtime, so an unpinned latest would silently break the exemption (and the
+# telegram-duty plugin) whenever a new release lands.
+RUN npm install -g @deepseek-ai/dsh@0.2.0-rc.2
 
 # nginx bridges Render's public port to dsh on loopback (see start.sh).
 RUN apt-get update && apt-get install -y --no-install-recommends nginx && rm -rf /var/lib/apt/lists/*
@@ -42,6 +45,7 @@ COPY sanitize-settings.mjs /app/sanitize-settings.mjs
 COPY login/index.html /app/login/index.html
 COPY profile/package.json /app/profile/package.json
 COPY profile/cordis.patch.yml /app/profile/cordis.patch.yml
+COPY profile/compatibility.json /app/profile/compatibility.json
 RUN chmod 644 /app/login/index.html && chmod +x /usr/local/bin/start.sh
 
 CMD ["/usr/local/bin/start.sh"]
