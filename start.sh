@@ -73,16 +73,28 @@ install_profile
 # resolved", and cordis swallows the underlying cause. Load the package the
 # same way the plugin loader does, so the real error reaches the log stream.
 echo "[dsh] diag: probing dsh-sandbox-local"
+ROOT=/usr/local/lib/node_modules
 node -e '
-const base = "/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai";
-for (const p of ["dsh-sandbox-local", "dsh-sandbox-windows-acl", "dsh-win32-process"]) {
-  try { require(`${base}/${p}`); console.log(`[dsh] diag: ${p} OK`); }
-  catch (e) { console.log(`[dsh] diag: ${p} FAIL -> ${e && e.message}`); }
+const fs = require("fs"), path = require("path");
+const root = "/usr/local/lib/node_modules";
+const target = "dsh-sandbox-local";
+const found = [];
+function scan(dir, depth) {
+  if (depth > 4 || found.length > 8) return;
+  let ents; try { ents = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+  for (const e of ents) {
+    if (e.name === "node_modules") continue;
+    const full = path.join(dir, e.name);
+    if (e.name === target) { found.push(path.dirname(full)); continue; }
+    if (e.isDirectory()) scan(full, depth + 1);
+  }
 }
-try { require.resolve("koffi", { paths: [`${base}/dsh-sandbox-windows-acl`] }); console.log("[dsh] diag: koffi OK"); }
-catch (e) { console.log(`[dsh] diag: koffi FAIL -> ${e && e.message}`); }
+scan(root, 0);
+console.log("[dsh] diag: dsh-sandbox-local found at:", found.length ? found.join(", ") : "NOWHERE under /usr/local/lib/node_modules");
+const dnm = path.join(root, "@deepseek-ai/dsh/node_modules/@deepseek-ai");
+try { console.log("[dsh] diag: nested @deepseek-ai count:", fs.readdirSync(dnm).length); } catch (e) { console.log("[dsh] diag: nested dir missing:", e.message); }
 ' 2>&1 || true
-echo "[dsh] diag: node $(node -v), $(uname -m)"
+echo "[dsh] diag: npm $(npm -v), node $(node -v), $(uname -m)"
 
 boot_dsh() {
   if [ -n "$TRUSTED" ]; then
