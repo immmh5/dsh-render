@@ -40,10 +40,19 @@ RUN npm install -g npm@12.2.0 \
 # only allow ^0.1.5-rc.2), so this swaps koffi for an inert stub on
 # non-Windows hosts, where the Win32 FFI paths can never run anyway. The
 # script is idempotent, so re-running it after any later reinstall is safe.
+#
+# Then the settings-loopback fix: on this deployment `dsh web` sits behind an
+# nginx reverse proxy on a public hostname, so dsh-client-connection's
+# isLoopback derivation is false and the client UI then refuses to read or
+# write the host settings store ("settings are unavailable in this browser").
+# The second script forces that one boolean true so the settings panels work
+# over the proxy. See fix/fix-settings-loopback.sh for the full chain.
 COPY fix/ /opt/dsh-fix/
 RUN chmod +x /opt/dsh-fix/fix-dup-win32-process.sh \
+  && chmod +x /opt/dsh-fix/fix-settings-loopback.sh \
   && /opt/dsh-fix/fix-dup-win32-process.sh \
   && /opt/dsh-fix/fix-dup-win32-process.sh \
+  && /opt/dsh-fix/fix-settings-loopback.sh \
   && rm -rf /root/.npm
 
 # nginx bridges Render's public port to dsh on loopback (see start.sh).
