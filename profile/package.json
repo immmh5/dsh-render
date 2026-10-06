@@ -10,8 +10,7 @@
         "@deepseek-ai/dsh-base",
         "@deepseek-ai/dsh-web-app",
         "@luzhengyangtx/dsh-telegram-duty"
-      ],
-      "patchReload": "live"
+      ]
     }
   }
 }
