@@ -52,19 +52,29 @@ if [ ! -d "$ROOT" ]; then
 	exit 0
 fi
 
-FILE="$ROOT/node_modules/@deepseek-ai/dsh-client-connection/lib/client.js"
-[ -f "$FILE" ] || {
-	echo "[settings-fix] not found: ${FILE#$ROOT/}" >&2
-	exit 1
-}
+echo "[settings-fix] scanning $ROOT"
 
-# Already patched? (marker comment is left in place by the edit below)
-if grep -q 'dsh-render settings-loopback patch' "$FILE"; then
-	echo "[settings-fix] already patched: ${FILE#$ROOT/}"
-	exit 0
-fi
+# npm's hoisting is unreliable with the prerelease ranges in this tree, so
+# dsh-client-connection can land several levels deep rather than directly
+# under $ROOT/node_modules. Scan for every physical copy and patch each one,
+# exactly like the win32 fix does.
+count=0
+patched=0
+for pkg in $(find "$ROOT" -type d -name 'dsh-client-connection'); do
+	count=$((count + 1))
+	FILE="$pkg/lib/client.js"
+	if [ ! -f "$FILE" ]; then
+		echo "[settings-fix]   skip (no lib/client.js): ${pkg#$ROOT/}"
+		continue
+	fi
 
-python3 - "$FILE" <<'PY'
+	# Already patched? (marker comment is left in place by the edit below)
+	if grep -q 'dsh-render settings-loopback patch' "$FILE"; then
+		echo "[settings-fix]   already patched: ${pkg#$ROOT/}"
+		continue
+	fi
+
+	python3 - "$FILE" <<'PY_INS' || exit 1
 import sys
 p = sys.argv[1]
 src = open(p, encoding="utf-8").read()
@@ -78,12 +88,20 @@ new = (
 	" * * loopback test (dev-only transport, page hostname) is false here and\n"
 	" * * the settings UI decides it may not touch the host store at all.\n"
 	" * * This deployment already authenticates remote access (session cookie\n"
-	" * * + trusted-host fence), so report loopback unconditionally and let the\n"
-	" * * settings panels read and write the host store as intended. */\n"
+	" * + trusted-host fence), so report loopback unconditionally and let the\n"
+	" * settings panels read and write the host store as intended. */\n"
 	"isLoopback: true,"
 )
 assert src.count(old) == 1, "expected exactly one isLoopback derivation in " + p
 open(p, "w", encoding="utf-8").write(src.replace(old, new))
-PY
+PY_INS
 
-echo "[settings-fix] PATCHED: ${FILE#$ROOT/} (isLoopback => true)"
+	patched=$((patched + 1))
+	echo "[settings-fix]   PATCHED: ${pkg#$ROOT/} (isLoopback => true)"
+done
+
+if [ "$count" -eq 0 ]; then
+	echo "[settings-fix] no dsh-client-connection under $ROOT; nothing to do"
+	exit 0
+fi
+echo "[settings-fix] copies=$count patched=$patched"
