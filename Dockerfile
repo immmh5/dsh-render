@@ -6,7 +6,7 @@ FROM node:22-bookworm-slim
 # so a C++ toolchain + python3 are needed. git is required for any GitHub-
 # hosted plugin you add later.
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends git python3 make g++ \
+  && apt-get install -y --no-install-recommends git ca-certificates python3 make g++ \
   && rm -rf /var/lib/apt/lists/* \
   && corepack enable && corepack prepare pnpm@11.26.0 --activate
 
