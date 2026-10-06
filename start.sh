@@ -39,15 +39,22 @@ if command -v git >/dev/null 2>&1; then
   else
     ok=0
     for attempt in 1 2 3 4 5; do
-      if git clone --depth 1 --quiet https://github.com/immmh5/dsh-render.git /opt/dsh-repo >/dev/null 2>&1; then
+      # Keep the clone's complaint: one trimmed line is enough to diagnose
+      # (DNS, proxy, refused) and the log is the only visibility we have.
+      if err=$(git clone --depth 1 --quiet https://github.com/immmh5/dsh-render.git /opt/dsh-repo 2>&1); then
         ok=1
         break
       fi
       # A half-finished clone would block every later retry, so clear it.
       rm -rf /opt/dsh-repo
-      sleep $((attempt * 3))
+      [ "$attempt" = 5 ] || sleep $((attempt * 3))
     done
-    [ "$ok" = 1 ] || echo "[dsh] self-update: clone failed after 5 tries; using image contents"
+    if [ "$ok" = 1 ]; then
+      echo "[dsh] self-update: cloned"
+    else
+      echo "[dsh] self-update: clone failed after 5 tries; using image contents"
+      echo "[dsh] self-update: last error: $(echo "$err" | tr '\n' ' ' | cut -c1-200)"
+    fi
   fi
 fi
 if [ -d /opt/dsh-repo ]; then
