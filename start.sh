@@ -25,16 +25,29 @@ TRUSTED="${TRUSTED_HOST:-}"
 # boot time also pulls the repo and syncs the runtime files + fix scripts.
 # That way the live container only ever needs a *restart* (sleep/wake, scaling,
 # manual restart) to land on the current commit — no successful Render build
-# required. The repo is public, so the clone needs no token. Every step is
-# best-effort and idempotent: a broken pull must not stop the UI from booting.
-# start.sh itself is deliberately NOT synced over the running script.
+# required. The repo is public, so the clone needs no token. Outbound network
+# can take a few seconds to come up on a cold free-plan boot, so the clone gets
+# several tries before we give up — otherwise /opt/dsh-repo never materializes
+# and restarts can no longer pick up main at all, defeating the safety net.
+# Every step is best-effort and idempotent: a broken pull must not stop the UI
+# from booting. start.sh itself is deliberately NOT synced over the running
+# script.
 if command -v git >/dev/null 2>&1; then
   if [ -d /opt/dsh-repo/.git ]; then
     git -C /opt/dsh-repo pull --ff-only --quiet >/dev/null 2>&1 \
       || echo "[dsh] self-update: pull failed; using last synced state"
   else
-    git clone --depth 1 --quiet https://github.com/immmh5/dsh-render.git /opt/dsh-repo >/dev/null 2>&1 \
-      || echo "[dsh] self-update: clone failed; using image contents"
+    ok=0
+    for attempt in 1 2 3 4 5; do
+      if git clone --depth 1 --quiet https://github.com/immmh5/dsh-render.git /opt/dsh-repo >/dev/null 2>&1; then
+        ok=1
+        break
+      fi
+      # A half-finished clone would block every later retry, so clear it.
+      rm -rf /opt/dsh-repo
+      sleep $((attempt * 3))
+    done
+    [ "$ok" = 1 ] || echo "[dsh] self-update: clone failed after 5 tries; using image contents"
   fi
 fi
 if [ -d /opt/dsh-repo ]; then
