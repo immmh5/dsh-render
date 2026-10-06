@@ -18,6 +18,49 @@ export DSH_HOME
 # browser-trust fence.
 TRUSTED="${TRUSTED_HOST:-}"
 
+# --- Self-update ------------------------------------------------------------
+# On the free plan, image builds are skipped whenever the service is suspended:
+# GitHub's deploy webhook fires while the container is asleep, Render drops the
+# build instead of queuing it, and the image silently drifts behind main. So
+# boot time also pulls the repo and syncs the runtime files + fix scripts.
+# That way the live container only ever needs a *restart* (sleep/wake, scaling,
+# manual restart) to land on the current commit — no successful Render build
+# required. The repo is public, so the clone needs no token. Every step is
+# best-effort and idempotent: a broken pull must not stop the UI from booting.
+# start.sh itself is deliberately NOT synced over the running script.
+if command -v git >/dev/null 2>&1; then
+  if [ -d /opt/dsh-repo/.git ]; then
+    git -C /opt/dsh-repo pull --ff-only --quiet >/dev/null 2>&1 \
+      || echo "[dsh] self-update: pull failed; using last synced state"
+  else
+    git clone --depth 1 --quiet https://github.com/immmh5/dsh-render.git /opt/dsh-repo >/dev/null 2>&1 \
+      || echo "[dsh] self-update: clone failed; using image contents"
+  fi
+fi
+if [ -d /opt/dsh-repo ]; then
+  for f in nginx.conf sync.js sanitize-settings.mjs login/index.html \
+           profile/package.json profile/cordis.patch.yml; do
+    if [ -f "/opt/dsh-repo/$f" ]; then
+      mkdir -p "/app/$(dirname "$f")"
+      cp -f "/opt/dsh-repo/$f" "/app/$f" || true
+    fi
+  done
+  mkdir -p /opt/dsh-fix
+  if [ -d /opt/dsh-repo/fix ]; then
+    for s in /opt/dsh-repo/fix/fix-*.sh; do
+      [ -f "$s" ] || continue
+      cp -f "$s" "/opt/dsh-fix/$(basename "$s")" || true
+    done
+    for s in /opt/dsh-fix/fix-*.sh; do
+      [ -f "$s" ] || continue
+      chmod +x "$s" 2>/dev/null || true
+      "$s" || echo "[dsh] self-update: $(basename "$s") failed"
+    done
+  fi
+  echo "[dsh] self-update: at $(git -C /opt/dsh-repo rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
+fi
+# --- end self-update --------------------------------------------------------
+
 # nginx.conf has placeholders (nginx cannot expand env vars in listen/
 # proxy_pass), so render the real config here and hand nginx the result.
 sed -e "s/__NGINX_PORT__/${PORT}/g" -e "s/__DSH_PORT__/${DSH_PORT}/g" \
