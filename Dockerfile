@@ -31,6 +31,21 @@ RUN npm install -g npm@12.2.0 \
   && npm install -g @deepseek-ai/dsh-sandbox-windows-acl@0.1.5-rc.2 \
   && npm install -g @deepseek-ai/dsh-win32-process@0.1.5-rc.2
 
+# Patch the duplicate-koffi crash. The pinned runtime mix above (dsh at
+# 0.1.5-rc.2, but its nested subprocess/sandbox packages at 0.1.5-rc.3)
+# leaves four physical copies of dsh-win32-process in the tree, and koffi
+# registers its struct names in a process-global registry — the second copy
+# to load throws "Duplicate type name 'DSH_STARTUPINFOW'" and `dsh web` dies
+# before it binds a port. Bumping dsh is not an option (the plugin's peers
+# only allow ^0.1.5-rc.2), so this swaps koffi for an inert stub on
+# non-Windows hosts, where the Win32 FFI paths can never run anyway. The
+# script is idempotent, so re-running it after any later reinstall is safe.
+COPY fix/ /opt/dsh-fix/
+RUN chmod +x /opt/dsh-fix/fix-dup-win32-process.sh \
+  && /opt/dsh-fix/fix-dup-win32-process.sh \
+  && /opt/dsh-fix/fix-dup-win32-process.sh \
+  && rm -rf /root/.npm
+
 # nginx bridges Render's public port to dsh on loopback (see start.sh).
 RUN apt-get update && apt-get install -y --no-install-recommends nginx && rm -rf /var/lib/apt/lists/*
 
