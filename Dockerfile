@@ -84,6 +84,20 @@ RUN cd /opt/dsh-profile \
   && pnpm install --no-frozen-lockfile --prod \
   && rm -rf /opt/dsh-profile/node_modules/.pnpm-store
 
+# npm 12.2.0 nests the dsh-client-ui-* packages one level deeper than npm 11
+# did: dsh-web-app's own deps land under
+# <dsh>/node_modules/@deepseek-ai/dsh-web-app/node_modules/@deepseek-ai, while
+# dsh-web-frontend stays at <dsh>/node_modules/@deepseek-ai. dsh-rtl's
+# patch_harness.py requires all four patched packages reachable from one root,
+# so hoist the three UI packages up to that root to match the npm 11 layout.
+# The install above pins dsh, so this is stable; the move is guarded and a
+# no-op if npm ever nests them at the top level again.
+RUN UI=/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai \
+  && NESTED=$UI/dsh-web-app/node_modules/@deepseek-ai \
+  && for p in dsh-client-ui-layout dsh-client-ui-attachment dsh-client-ui-directory-picker-browse; do \
+       [ -d "$NESTED/$p" ] && [ ! -e "$UI/$p" ] && mv "$NESTED/$p" "$UI/$p"; \
+     done; true
+
 # dsh-rtl: patch the harness bundles for correct RTL geometry (drag handles,
 # rail edges, tooltip/dropdown placement). Anchors are validated against this
 # exact dsh pin; the script is idempotent and fails loudly if a bundle moved.
