@@ -16,3 +16,27 @@
     watchMode: duty
     dataDir: /data/storages/telegram-duty
     dutyCwd: /workspace
+
+# --- Extensions hub -----------------------------------------------------------
+# خوادم MCP: مسجّلة كـ stdio clients. تبقى معطّلة افتراضياً وتُفعّل من لوحة
+# الإدارة (Settings → Plugins/MCP)؛ تفعيل الكل دفعة واحدة قد يبطئ الإقلاع على
+# الطبقة المجانية. plugins الواجهة (السوق، إدارة الإضافات، المهارات) تُحمّل
+# تلقائياً في المتصفح من dsh-client-ui-* فلا تحتاج تسجيلاً هنا.
+
+- id: mcp-filesystem
+  name: "@deepseek-ai/dsh-mcp-client"
+  disabled: true
+  config:
+    serverName: filesystem
+    transport: stdio
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "/workspace"]
+
+- id: mcp-fetch
+  name: "@deepseek-ai/dsh-mcp-client"
+  disabled: true
+  config:
+    serverName: fetch
+    transport: stdio
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-fetch"]

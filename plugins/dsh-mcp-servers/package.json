@@ -1,0 +1,67 @@
+{
+  "name": "dsh-mcp-servers",
+  "version": "1.0.0",
+  "description": "MCP server manager for the DeepSeek Harness web GUI. Adds a settings section that lists every MCP server registered in the profile, lets you enable/disable, add, edit, delete and restart them, and shows live tool counts reported by the MCP client. Built on the same Typert Remote gateway shape as dsh-addons-manager.",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/host.js",
+  "exports": {
+    ".": "./lib/host.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/host.js",
+    "lib/client.js",
+    "lib/yamlkit.mjs",
+    "lib/patchops.mjs",
+    "test/patchops.test.mjs",
+    "test/yamlkit.test.mjs",
+    "test/client.test.mjs",
+    "test/host.test.mjs",
+    "cordis.patch.yml",
+    "install.sh",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node test/yamlkit.test.mjs && node test/patchops.test.mjs && node test/client.test.mjs",
+    "check": "node --check lib/host.js && node --check lib/client.js && node --check lib/yamlkit.mjs && node --check lib/patchops.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ],
+      "platform": "web"
+    }
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "mcp",
+    "model-context-protocol",
+    "servers",
+    "tools"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-typert-protocol": "^0.1.5-rc.2",
+    "@deepseek-ai/schemastery": "^3.18.2"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    }
+  }
+}
