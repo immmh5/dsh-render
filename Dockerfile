@@ -46,13 +46,17 @@ RUN npm install -g npm@12.2.0 \
 # isLoopback derivation is false and the client UI then refuses to read or
 # write the host settings store ("settings are unavailable in this browser").
 # The second script forces that one boolean true so the settings panels work
-# over the proxy. See fix/fix-settings-loopback.sh for the full chain.
+# over the proxy. The third pins the browser login token to a fixed value from
+# DSH_WEB_TOKEN (injected at runtime) instead of a random per-launch token.
+# See fix/fix-settings-loopback.sh and fix/fix-fixed-login-token.sh.
 COPY fix/ /opt/dsh-fix/
 RUN chmod +x /opt/dsh-fix/fix-dup-win32-process.sh \
   && chmod +x /opt/dsh-fix/fix-settings-loopback.sh \
+  && chmod +x /opt/dsh-fix/fix-fixed-login-token.sh \
   && /opt/dsh-fix/fix-dup-win32-process.sh \
   && /opt/dsh-fix/fix-dup-win32-process.sh \
   && /opt/dsh-fix/fix-settings-loopback.sh \
+  && /opt/dsh-fix/fix-fixed-login-token.sh \
   && rm -rf /root/.npm
 
 # nginx bridges Render's public port to dsh on loopback (see start.sh).

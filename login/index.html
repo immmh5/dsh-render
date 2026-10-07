@@ -78,26 +78,25 @@
 <body>
 <main class="card">
   <div class="brand"><span class="mark">DSH</span> DeepSeek Harness</div>
-  <h1>أدخل كود الأمان</h1>
+  <h1>أدخل كلمة المرور</h1>
   <p class="hint">
-    الكود يتجدّد تلقائياً مع كل إقلاع للخادم. تجده في سجلّات Render ضمن السطر
-    الحاوي على <code>?token=</code>.
+    كلمة المرور ثابتة — لا حاجة لمراجعة السجلّات بعد كل نشر.
   </p>
   <form id="form" action="/" method="get" autocomplete="off">
     <label class="field">
-      <span class="lbl">كود الأمان</span>
+      <span class="lbl">كلمة المرور</span>
       <span class="ctrl">
         <input id="code" name="token" type="password" inputmode="text"
-               autocapitalize="off" spellcheck="false" placeholder="M5x8…" required>
+               autocapitalize="off" spellcheck="false" required>
         <button type="button" id="toggle" class="toggle">إظهار</button>
       </span>
     </label>
     <button type="submit" class="submit">دخول</button>
     <p id="err" class="err" hidden>
-      الكود غير صحيح أو منتهي. انسخ أحدث كود من سجلّات Render وأعد المحاولة.
+      كلمة المرور غير صحيحة. أعد المحاولة.
     </p>
   </form>
-  <p class="foot">كل جهاز أو متصفّح يسجّل الدخول بالكود نفسه بشكل مستقلّ — لا حاجة لتسجيل الخروج من جهاز آخر.</p>
+  <p class="foot">كل جهاز أو متصفّح يسجّل الدخول بكلمة المرور نفسها بشكل مستقلّ — لا حاجة لتسجيل الخروج من جهاز آخر.</p>
 </main>
 <script>
 (function () {
