@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="4">
+<title>Starting up — DeepSeek Harness</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; height: 100vh; display: grid; place-items: center;
+    background: #0d1117; color: #e6edf3;
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  }
+  .card { max-width: 420px; padding: 0 24px; text-align: center; }
+  .spin {
+    width: 34px; height: 34px; margin: 0 auto 20px;
+    border: 3px solid #30363d; border-top-color: #58a6ff;
+    border-radius: 50%; animation: sp .9s linear infinite;
+  }
+  @keyframes sp { to { transform: rotate(360deg); } }
+  h1 { font-size: 18px; margin: 0 0 8px; font-weight: 600; }
+  p { margin: 0; color: #8b949e; font-size: 13.5px; }
+  .bar {
+    margin: 22px 0 0; height: 3px; border-radius: 99px;
+    background: #21262d; overflow: hidden; position: relative;
+  }
+  .bar::after {
+    content: ""; position: absolute; inset: 0; width: 40%;
+    border-radius: 99px; background: #58a6ff;
+    animation: sh 1.4s ease-in-out infinite;
+  }
+  @keyframes sh { 0% { left: -40%; } 100% { left: 100%; } }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="spin"></div>
+    <h1>The instance is starting up</h1>
+    <p>This free-tier service takes about a minute to boot after a deploy or a
+       period of inactivity. This page refreshes itself &mdash; the app appears
+       automatically the moment it is ready.</p>
+    <div class="bar"></div>
+  </div>
+  <script>
+    // Meta refresh covers no-JS; this keeps the URL and swaps in silently.
+    setTimeout(function(){ location.reload(); }, 4000);
+  </script>
+</body>
+</html>

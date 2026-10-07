@@ -59,7 +59,7 @@ if command -v git >/dev/null 2>&1; then
 fi
 if [ -d /opt/dsh-repo ]; then
   for f in nginx.conf sync.js sanitize-settings.mjs login/index.html \
-           profile/package.json profile/cordis.patch.yml; do
+           login/booting.html profile/package.json profile/cordis.patch.yml; do
     if [ -f "/opt/dsh-repo/$f" ]; then
       mkdir -p "/app/$(dirname "$f")"
       cp -f "/opt/dsh-repo/$f" "/app/$f" || true
@@ -76,10 +76,17 @@ if [ -d /opt/dsh-repo ]; then
     for p in /opt/dsh-repo/plugins/*/; do
       name=$(basename "$p")
       [ -d "/opt/dsh-plugins/$name" ] || continue
+      # "$p" ends in "/", so a plain "*" must stay UNQUOTED for the shell to
+      # expand it (a quoted "$p"* leaves the glob literal and cp fails with
+      # "cannot stat '.../plugins/<name>/*'"). The empty-dir case is handled by
+      # the glob guard below rather than by quoting.
       if command -v rsync >/dev/null 2>&1; then
         rsync -a --delete --exclude node_modules "$p" "/opt/dsh-plugins/$name/" || true
       else
-        cp -af "$p"*. "/opt/dsh-plugins/$name/" || true
+        # Only copy when the source actually has entries; otherwise cp errors.
+        if [ -n "$(ls -A "$p" 2>/dev/null)" ]; then
+          cp -af ${p}* "/opt/dsh-plugins/$name/" || true
+        fi
       fi
     done
   fi

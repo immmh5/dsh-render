@@ -121,8 +121,9 @@ COPY nginx.conf /app/nginx.conf
 COPY sync.js /app/sync.js
 COPY sanitize-settings.mjs /app/sanitize-settings.mjs
 COPY login/index.html /app/login/index.html
+COPY login/booting.html /app/login/booting.html
 COPY profile/package.json /app/profile/package.json
 COPY profile/cordis.patch.yml /app/profile/cordis.patch.yml
-RUN chmod 644 /app/login/index.html && chmod +x /usr/local/bin/start.sh
+RUN chmod 644 /app/login/index.html /app/login/booting.html && chmod +x /usr/local/bin/start.sh
 
 CMD ["/usr/local/bin/start.sh"]
