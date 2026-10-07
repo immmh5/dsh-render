@@ -65,6 +65,24 @@ if [ -d /opt/dsh-repo ]; then
       cp -f "/opt/dsh-repo/$f" "/app/$f" || true
     fi
   done
+
+  # Refresh the vendored dsh-kit plugins (dsh-addons-manager, dsh-arabic,
+  # dsh-rtl). They are baked into the image at /opt/dsh-plugins and pnpm
+  # hard-links them into /opt/dsh-profile/node_modules, so re-syncing the
+  # source tree is enough to pick up edits pushed to the repo without a
+  # Render image rebuild. --delete keeps the trees identical (removed files
+  # actually disappear); rsync is not guaranteed present, so fall back to cp.
+  if [ -d /opt/dsh-repo/plugins ]; then
+    for p in /opt/dsh-repo/plugins/*/; do
+      name=$(basename "$p")
+      [ -d "/opt/dsh-plugins/$name" ] || continue
+      if command -v rsync >/dev/null 2>&1; then
+        rsync -a --delete --exclude node_modules "$p" "/opt/dsh-plugins/$name/" || true
+      else
+        cp -af "$p"*. "/opt/dsh-plugins/$name/" || true
+      fi
+    done
+  fi
   mkdir -p /opt/dsh-fix
   if [ -d /opt/dsh-repo/fix ]; then
     for s in /opt/dsh-repo/fix/fix-*.sh; do

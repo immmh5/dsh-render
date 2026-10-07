@@ -1,0 +1,60 @@
+{
+  "name": "dsh-arabic",
+  "version": "1.0.0",
+  "description": "Arabic (ar) language pack for the DeepSeek Harness web GUI. Registers ar under Settings → General → Language, ships static translations for every UI namespace (core, skills, plugins and the third-party add-ons dsh-cron / telegram-duty / extension-hub), Arabicizes add-on sources that ship their own i18n tables — including the Telegram-facing strings of telegram-duty, dsh-telegram-channel and dsh-cron — and installs the Telegram bot command menu (the `/` list) in Arabic.",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "cordis.patch.yml",
+    "locales/ar.json",
+    "locales/en.json",
+    "build.py",
+    "README.md",
+    "patch_addons.py",
+    "patch_telegram.py",
+    "push_tg_menu.py",
+    "install.sh",
+    "assets/freesearch-ar.js",
+    "assets/tduty-ar.js",
+    "assets/tgchannel-ar.json"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-locale"
+      ],
+      "platform": "web"
+    }
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "arabic",
+    "rtl",
+    "i18n",
+    "locale"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    }
+  }
+}

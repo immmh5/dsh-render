@@ -1,0 +1,44 @@
+.dshrtl_row{border-bottom:.5px solid var(--dsw-alias-border-l2);align-items:center;gap:8px;padding:16px 0;display:flex}
+.dshrtl_rowText{flex-direction:column;flex:1;gap:4px;min-width:0;padding-right:48px;display:flex}
+.dshrtl_title{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:400;line-height:22px}
+.dshrtl_hint{color:var(--dsw-alias-label-secondary,var(--dsw-alias-label-primary));font-size:12px;font-weight:400;line-height:18px}
+.dshrtl_selector{background:var(--dsw-alias-bg-module-platform);height:36px;font:inherit;color:var(--dsw-alias-label-primary);cursor:pointer;border:none;border-radius:18px;align-items:center;gap:12px;padding:0 14px;font-size:14px;line-height:22px;display:inline-flex}
+.dshrtl_selector:hover{background:var(--dsw-alias-interactive-bg-hover)}
+.dshrtl_chevron{flex:none}
+
+/* Settings section: the AUTO direction panel. */
+.dshrtl_sec{display:flex;flex-direction:column;gap:16px}
+.dshrtl_secHead{display:flex;flex-direction:column;gap:4px}
+.dshrtl_secTitle{color:var(--dsw-alias-label-primary);font-size:15px;font-weight:500;line-height:22px}
+.dshrtl_secNote{color:var(--dsw-alias-label-secondary,var(--dsw-alias-label-primary));font-size:12px;line-height:18px}
+.dshrtl_box{border:.5px solid var(--dsw-alias-border-l2);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:12px}
+.dshrtl_field{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.dshrtl_fieldText{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.dshrtl_label{color:var(--dsw-alias-label-primary);font-size:13px;line-height:20px}
+.dshrtl_sub{color:var(--dsw-alias-label-secondary,var(--dsw-alias-label-primary));font-size:12px;line-height:18px}
+.dshrtl_pills{display:flex;gap:6px;flex-wrap:wrap}
+.dshrtl_pill{background:var(--dsw-alias-bg-module-platform);color:var(--dsw-alias-label-primary);border:.5px solid var(--dsw-alias-border-l2);border-radius:6px;height:32px;padding:0 12px;font:inherit;font-size:13px;cursor:pointer}
+.dshrtl_pill:hover{background:var(--dsw-alias-interactive-bg-hover)}
+.dshrtl_pill[data-on="true"]{background:var(--dsw-alias-interactive-bg-active,var(--dsw-alias-bg-module-platform));border-color:transparent;font-weight:500}
+.dshrtl_num{width:96px;height:32px;background:var(--dsw-alias-bg-module-platform);color:var(--dsw-alias-label-primary);border:.5px solid var(--dsw-alias-border-l2);border-radius:6px;padding:0 8px;font:inherit;font-size:13px;text-align:center}
+.dshrtl_check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dsw-alias-label-primary)}
+.dshrtl_switch{cursor:pointer}
+.dshrtl_switch input{accent-color:var(--dsw-alias-interactive-bg-active,var(--dsw-alias-label-primary));cursor:pointer;flex:none;height:16px;width:16px}
+
+/* Collapsible groups: every direction knob lives in one of these. */
+.dshrtl_group{border:.5px solid var(--dsw-alias-border-l2);border-radius:8px;display:flex;flex-direction:column;overflow:hidden}
+.dshrtl_sum{align-items:center;cursor:pointer;display:flex;font-size:13px;font-weight:500;gap:8px;list-style:none;padding:10px 12px;user-select:none;color:var(--dsw-alias-label-primary)}
+.dshrtl_sum::-webkit-details-marker{display:none}
+.dshrtl_sum::after{content:"›";font-size:15px;line-height:1;margin-inline-start:auto;opacity:.55;transform:rotate(90deg);transition:transform .15s ease}
+.dshrtl_group[open]>.dshrtl_sum::after{transform:rotate(-90deg)}
+.dshrtl_group>.dshrtl_box{border:none;border-radius:0;border-top:.5px solid var(--dsw-alias-border-l2)}
+.dshrtl_textareaRow{display:flex;flex-direction:column;gap:6px}
+.dshrtl_area{direction:ltr;text-align:left;background:var(--dsw-alias-bg-module-platform);border:.5px solid var(--dsw-alias-border-l2);border-radius:6px;color:var(--dsw-alias-label-primary);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:18px;min-height:56px;padding:8px;resize:vertical;width:100%}
+.dshrtl_areaTall{min-height:160px}
+.dshrtl_select{background:var(--dsw-alias-bg-module-platform);border:.5px solid var(--dsw-alias-border-l2);border-radius:6px;color:var(--dsw-alias-label-primary);font:inherit;font-size:13px;height:32px;min-width:132px;padding:0 8px}
+.dshrtl_numWide{width:116px}
+.dshrtl_btns{align-items:center;display:flex;flex-wrap:wrap;gap:8px}
+.dshrtl_btn{background:var(--dsw-alias-bg-module-platform);border:.5px solid var(--dsw-alias-border-l2);border-radius:6px;color:var(--dsw-alias-label-primary);cursor:pointer;font:inherit;font-size:13px;height:32px;padding:0 12px}
+.dshrtl_btn:hover{background:var(--dsw-alias-interactive-bg-hover)}
+.dshrtl_btnDanger{border-color:var(--dsw-alias-semantic-danger-border,var(--dsw-alias-border-l2));color:var(--dsw-alias-semantic-danger-fg,var(--dsw-alias-label-primary))}
+.dshrtl_status{color:var(--dsw-alias-label-secondary,var(--dsw-alias-label-primary));font-size:12px}

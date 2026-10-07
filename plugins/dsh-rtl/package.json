@@ -1,0 +1,68 @@
+{
+  "name": "dsh-rtl",
+  "version": "1.1.0",
+  "description": "Right-to-left / left-to-right switch for the DeepSeek Harness web GUI. Adds a Text direction row under Settings > General > Language with three modes (RTL / AUTO / LTR), drives <html dir>, injects a generated RTL override layer, keeps code/terminal/diff/JSON/path panes LTR, and applies idempotent on-disk fixes for the drag handles, timeline scroll and attachment carousel. AUTO keeps the chrome RTL while mostly-English chat blocks, the composer and (optionally) sidebar titles flip themselves to LTR. Its own settings section exposes every knob in seven groups: mode, zones, detection (threshold, min/max letters, mixed text, digits), behaviour (debounce, observer, input, debug), override rules (force LTR/RTL, ignore), selectors (scope, composer, scan, block, island, sidebar) and JSON import/export with a restore-defaults action. Regenerate with install.sh after every Harness update.",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "cordis.patch.yml",
+    "locales/en.json",
+    "locales/ar.json",
+    "locales/zh.json",
+    "gen_rtl.py",
+    "build.py",
+    "patch_harness.py",
+    "README.md",
+    "assets/row.css",
+    "assets/driver.css",
+    "assets/rtl.css",
+    "install.sh",
+    "test/client.test.mjs"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ],
+      "platform": "web",
+      "immediately": true
+    }
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "rtl",
+    "ltr",
+    "direction",
+    "arabic"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "test": "node test/client.test.mjs",
+    "check": "node --check lib/index.js && node --check lib/client.js && python3 build.py --check"
+  }
+}

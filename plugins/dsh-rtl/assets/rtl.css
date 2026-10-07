@@ -1,0 +1,381 @@
+/* dsh-rtl: generated RTL override layer -- do not edit; run install.sh */
+/* scanned 132 css blobs from dsh-web-frontend and 65 dsh.client packages */
+
+/* ---- LTR islands: code, terminals, diffs, JSON, file paths ---- */
+html[dir="rtl"] .md-code-block { direction: ltr !important; text-align: left !important; unicode-bidi: isolate; }
+html[dir="rtl"] [data-files-path] { direction: ltr !important; text-align: left !important; unicode-bidi: isolate; }
+html[dir="rtl"] .Y0dWHa_jsonPayload { direction: ltr !important; text-align: left !important; unicode-bidi: isolate; }
+html[dir="rtl"] .Y0dWHa_jsonPreview { direction: ltr !important; text-align: left !important; unicode-bidi: isolate; }
+html[dir="rtl"] .Y0dWHa_promptDiff { direction: ltr !important; text-align: left !important; unicode-bidi: isolate; }
+html[dir="rtl"] .Y0dWHa_resultBlockText { direction: ltr !important; text-align: left !important; unicode-bidi: isolate; }
+html[dir="rtl"] .Y0dWHa_sourceBlockContent { direction: ltr !important; text-align: left !important; unicode-bidi: isolate; }
+html[dir="rtl"] .o3BgMG_codeBody { direction: ltr !important; text-align: left !important; unicode-bidi: isolate; }
+html[dir="rtl"] .o3BgMG_diffBody { direction: ltr !important; text-align: left !important; unicode-bidi: isolate; }
+html[dir="rtl"] .o3BgMG_terminalBody { direction: ltr !important; text-align: left !important; unicode-bidi: isolate; }
+
+/* ---- Arabic interface fonts ---- */
+html[dir="rtl"] {
+	--dsw-font-family: "Noto Sans Arabic", "Noto Kufi Arabic", "Geeza Pro", "Segoe UI", Tahoma, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif !important;
+	--ds-font-family: "Noto Sans Arabic", "Noto Kufi Arabic", "Geeza Pro", "Segoe UI", Tahoma, -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* ---- mirrored declarations ---- */
+html[dir="rtl"] ._leading_luwio_29 { margin-right: 0 !important; margin-left: 6px !important }
+html[dir="rtl"] ._list_1nxmc_8:not(._portal_1nxmc_44) { left: auto; right: 0 }
+html[dir="rtl"] ._portal_1nxmc_44 { right: auto }
+html[dir="rtl"] ._alignEnd_1nxmc_57:not(._portal_1nxmc_44) { left: 0; right: auto }
+html[dir="rtl"] ._item_1nxmc_92 { text-align: right !important }
+html[dir="rtl"] ._submenu_1nxmc_9 { left: auto; right: calc(100% + 10px) }
+html[dir="rtl"] ._submenu_1nxmc_9:before { left: auto; right: -10px }
+html[dir="rtl"] ._header_w1urq_45 { padding-right: 24px !important; padding-left: 14px !important }
+html[dir="rtl"] ._label_1ycze_51 { text-align: right !important }
+html[dir="rtl"] ._dots_1ycze_78 { text-align: right !important }
+html[dir="rtl"] ._refIcon_z12h9_36 { margin-right: 0 !important; margin-left: 4px !important }
+html[dir="rtl"] ._expandedTopLevel_4qrvp_39 { padding-right: 14px !important; padding-left: 8px !important }
+html[dir="rtl"] ._row_4qrvp_55._topLevelBracket_4qrvp_46 { margin-right: 0 !important; padding-right: 0 !important }
+html[dir="rtl"] ._row_4qrvp_55 { padding-right: 10px !important; padding-left: 0 !important }
+html[dir="rtl"] ._label_4qrvp_95 { margin-right: 0 !important; margin-left: 3px !important }
+html[dir="rtl"] ._expander_4qrvp_78 { left: auto; right: 0 }
+html[dir="rtl"] ._expander_4qrvp_78:before { border-left-width: 0 !important; border-left-style: none !important; border-right-width: 6px !important; border-right-style: solid !important; border-right-color: currentColor !important }
+html[dir="rtl"] ._block_1gdtu_1 { padding-left: 0 !important; padding-right: var(--dsl-terminal-gutter) !important }
+html[dir="rtl"] ._header_1gdtu_32 { margin-left: 0 !important; padding-right: var(--dsl-terminal-gutter) !important; padding-left: 14px !important; margin-right: calc(-1 * var(--dsl-terminal-gutter)) !important }
+html[dir="rtl"] ._runState_1gdtu_91 { left: auto; right: calc(-1 * var(--dsl-terminal-gutter) + 8px) }
+html[dir="rtl"] ._output_1gdtu_156 { padding-right: 0 !important; padding-left: 14px !important }
+html[dir="rtl"] ._expand_1gdtu_185 { text-align: right !important }
+html[dir="rtl"] ._empty_1gdtu_201 { padding-right: 0 !important; padding-left: 14px !important }
+html[dir="rtl"] ._gutter_onbk6_82 { padding-right: 0 !important; text-align: left !important; padding-left: 14px !important }
+html[dir="rtl"] ._expand_onbk6_97 { padding-right: var(--dsl-read-gutter) !important; padding-left: 0 !important; text-align: right !important }
+html[dir="rtl"] ._copyButton_12o37_16 { right: auto; left: 12px }
+html[dir="rtl"] ._path_12o37_47 { padding-right: 0 !important; padding-left: 56px !important }
+html[dir="rtl"] ._expand_12o37_79 { text-align: right !important }
+html[dir="rtl"] ._body_1h7p4_43 { padding-right: 0 !important; padding-left: 14px !important }
+html[dir="rtl"] ._line_1h7p4_52 { padding-left: 0 !important; padding-right: 14px !important }
+html[dir="rtl"] ._fileHeader_1h7p4_66 { text-align: right !important }
+html[dir="rtl"] ._expand_1h7p4_92 { text-align: right !important }
+html[dir="rtl"] ._linkIcon_kcgor_92 { margin-right: 0 !important; margin-left: 5px !important }
+html[dir="rtl"] ._markdown_kcgor_5 :where(ul,ol) { padding-left: 0 !important; padding-right: 18px !important }
+html[dir="rtl"] ._markdown_kcgor_5 :where(ul,ol) ol { padding-right: 0 !important }
+html[dir="rtl"] ._markdown_kcgor_5 blockquote { border-left-width: 0 !important; border-left-style: none !important; border-left-color: currentColor !important; padding-left: 0 !important; padding-right: 14px !important; border-right-width: 2px !important; border-right-style: solid !important; border-right-color: var(--dsw-alias-label-caption) !important }
+html[dir="rtl"] ._markdown_kcgor_5 input[type=checkbox] { margin-right: 0 !important; margin-left: 8px !important }
+html[dir="rtl"] ._tableScroll_kcgor_190 th:first-child, html[dir="rtl"] ._tableScroll_kcgor_190 td:first-child { padding-right: 0 !important }
+html[dir="rtl"] ._tableScroll_kcgor_190 td:last-child { padding-left: 0 !important }
+html[dir="rtl"] ._sources_19q7d_40 { padding-left: 0 !important; padding-right: 2.5em !important }
+html[dir="rtl"] ._linkIcon_19q7d_65 { margin-right: 0 !important; margin-left: 5px !important }
+html[dir="rtl"] ._splitRow_17p4l_24>._divider_17p4l_39:before { left: auto; right: -.25px }
+html[dir="rtl"] ._tabStrip_17p4l_156 { padding-right: 10px !important; padding-left: 6px !important }
+html[dir="rtl"] ._stripChrome_17p4l_212 { margin-left: 0 !important; margin-right: 4px !important }
+html[dir="rtl"] ._tabClose_17p4l_314 { right: auto; left: 4px }
+html[dir="rtl"] ._menuItem_17p4l_460 { text-align: right !important }
+html[dir="rtl"] ._dockHint_17p4l_500[data-dockkit-dock-zone=left] { left: auto; right: 0 }
+html[dir="rtl"] ._dockHint_17p4l_500[data-dockkit-dock-zone=right] { right: auto; left: 0 }
+html[dir="rtl"] [data-dockkit-drop-zones=horizontal] ._dockHint_17p4l_500[data-dockkit-dock-zone=left] { padding-right: 0 !important; padding-left: 4px !important }
+html[dir="rtl"] [data-dockkit-drop-zones=horizontal] ._dockHint_17p4l_500[data-dockkit-dock-zone=right] { padding-left: 0 !important; padding-right: 4px !important }
+html[dir="rtl"] ._floatResize_17p4l_696 { right: auto; left: 0 }
+html[dir="rtl"] ._floatResize_17p4l_696:after { right: auto; border-right-width: 0 !important; border-right-style: none !important; border-right-color: currentColor !important; border-bottom-right-radius: 0 !important; left: 4px; border-left-width: 1.5px !important; border-left-style: solid !important; border-left-color: var(--dsw-alias-label-caption) !important; border-bottom-left-radius: 16px !important }
+html[dir="rtl"] .katex .vlist-t2 { margin-right: 0 !important; margin-left: -2px !important }
+html[dir="rtl"] .katex .msupsub { text-align: right !important }
+html[dir="rtl"] .katex .llap>.inner { right: auto; left: 0 }
+html[dir="rtl"] .katex .clap>.inner, html[dir="rtl"] .katex .rlap>.inner { left: auto; right: 0 }
+html[dir="rtl"] .katex .clap>.inner>span { margin-left: 50% !important; margin-right: -50% !important }
+html[dir="rtl"] .katex .sqrt>.root { margin-left: -.5555555556em !important; margin-right: .2777777778em !important }
+html[dir="rtl"] .katex .mtable .col-align-l>.vlist-t { text-align: right !important }
+html[dir="rtl"] .katex .mtable .col-align-r>.vlist-t { text-align: left !important }
+html[dir="rtl"] .katex .svg-align { text-align: right !important }
+html[dir="rtl"] .katex .halfarrow-left { left: auto; right: 0 }
+html[dir="rtl"] .katex .halfarrow-right { right: auto; left: 0 }
+html[dir="rtl"] .katex .brace-left { left: auto; right: 0 }
+html[dir="rtl"] .katex .brace-center { left: auto; right: 25% }
+html[dir="rtl"] .katex .brace-right { right: auto; left: 0 }
+html[dir="rtl"] .katex .cd-arrow-pad { padding-right: .27778em !important; padding-left: .55556em !important }
+html[dir="rtl"] .katex .angl { border-right-width: 0 !important; border-right-style: none !important; margin-right: 0 !important; margin-left: .03889em !important; border-left-width: .049em !important; border-left-style: solid !important }
+html[dir="rtl"] .katex .cd-label-left { right: auto; text-align: right !important; left: calc(50% + .3em) }
+html[dir="rtl"] .katex .cd-label-right { left: auto; text-align: left !important; right: calc(50% + .3em) }
+html[dir="rtl"] .katex-display>.katex>.katex-html>.tag { right: auto; left: 0 }
+html[dir="rtl"] .katex-display.leqno>.katex>.katex-html>.tag { left: auto; right: 0 }
+html[dir="rtl"] .katex-display.fleqn>.katex { padding-left: 0 !important; text-align: right !important; padding-right: 2em !important }
+html[dir="rtl"] .hVGvvW_rowText { padding-right: 0 !important; padding-left: 48px !important }
+html[dir="rtl"] .SVAs4q_label { padding-right: 0 !important; padding-left: 2px !important }
+html[dir="rtl"] .rtSEdW_brokenTip { text-align: right !important; left: auto; right: 0 }
+html[dir="rtl"] .rtSEdW_cardMain { text-align: right !important }
+html[dir="rtl"] .rtSEdW_inUse { margin-left: 0 !important; margin-right: auto !important }
+html[dir="rtl"] .rtSEdW_iconButton:after { left: auto; right: 50% }
+html[dir="rtl"] .JVDQca_remove { right: auto; left: 4px }
+html[dir="rtl"] .JVDQca_arrowLeft { left: auto; right: 4px }
+html[dir="rtl"] .JVDQca_arrowRight { right: auto; left: 4px }
+html[dir="rtl"] .gSkjMW_card { text-align: right !important }
+html[dir="rtl"] .gSkjMW_retry { text-align: right !important }
+html[dir="rtl"] .gSkjMW_remove { right: auto; left: 6px }
+html[dir="rtl"] .gSkjMW_card:hover .gSkjMW_name, html[dir="rtl"] .gSkjMW_card:focus-within .gSkjMW_name { padding-right: 0 !important; padding-left: 18px !important }
+html[dir="rtl"] .fNh4Da_close { right: auto; left: 20px }
+html[dir="rtl"] ._54WpYG_remove { right: auto; left: 4px }
+html[dir="rtl"] .Sixlwa_compactionButton { text-align: right !important }
+html[dir="rtl"] .Sixlwa_compactionLeading { margin-right: 0 !important; margin-left: 6px !important }
+html[dir="rtl"] .Sixlwa_compactionBody { padding-right: calc(22px + var(--dsh-content-font-delta,0px)) !important; padding-left: 0 !important }
+html[dir="rtl"] .Sixlwa_retryDetails { padding-left: 0 !important; padding-right: 14px !important }
+html[dir="rtl"] .Sixlwa_turnErrorTitle { margin-right: 0 !important; margin-left: 6px !important }
+html[dir="rtl"] .Sixlwa_maxTokensTitle { margin-right: 0 !important; margin-left: 6px !important }
+html[dir="rtl"] .XrJvXW_body { margin-right: calc(22px + var(--dsh-content-font-delta,0px)) !important; margin-left: 0 !important; padding-right: 12px !important; padding-left: 16px !important }
+html[dir="rtl"] .xzv4MW_timeStart { padding-right: 0 !important; padding-left: 12px !important }
+html[dir="rtl"] .EvIC1a_turnStatusClock { margin-left: 0 !important; margin-right: 8px !important }
+html[dir="rtl"] .EvIC1a_toBottomSlot { padding-right: 0 !important; padding-left: max(0px, calc((100% - var(--dsh-chat-content-width)) / 2)) !important }
+html[dir="rtl"] .eGxaPq_frame { right: auto; left: calc(12px - (var(--dsh-composer-side-clearance) + 16px)) }
+html[dir="rtl"] .eGxaPq_mark { right: auto; left: 0 }
+html[dir="rtl"] .eGxaPq_preview { right: auto; left: calc(100% + 10px) }
+@keyframes lcKema_dsh-reasoning-row-sweep{
+0% { left: auto; right: -300px }
+}
+@keyframes lcKema_dsh-reasoning-row-sweep{
+90%,to { left: auto; right: 100% }
+}
+html[dir="rtl"] .lcKema_thinkBody { padding-right: calc(22px + var(--dsh-content-font-delta,0px)) !important; padding-left: 0 !important }
+html[dir="rtl"] .hWmORq_body .md-table-wide { margin-left: 0 !important; padding-left: 0 !important; margin-right: calc(-1 * var(--dsh-table-lead)) !important; padding-right: var(--dsh-table-lead) !important }
+html[dir="rtl"] .hWmORq_actions { margin-left: 0 !important; margin-right: -6px !important }
+@keyframes _5OnbHa_dsh-command-row-sweep{
+0% { left: auto; right: -300px }
+}
+@keyframes _5OnbHa_dsh-command-row-sweep{
+90%,to { left: auto; right: 100% }
+}
+html[dir="rtl"] ._5OnbHa_body { margin-right: 4px !important; margin-left: 0 !important }
+html[dir="rtl"] .l_V-RG_root { text-align: right !important }
+html[dir="rtl"] .l_V-RG_chevron { margin-left: 0 !important; margin-right: 6px !important }
+html[dir="rtl"] .Q51KRG_root+.Q51KRG_root { margin-left: 0 !important; margin-right: -6px !important }
+@media (width<=480px){
+html[dir="rtl"] .Q51KRG_root+.Q51KRG_root { margin-right: 0 !important }
+}
+html[dir="rtl"] .bRhRbq_details dd { text-align: left !important }
+html[dir="rtl"] .TS9iAW_actions { margin-left: 0 !important; margin-right: -6px !important }
+html[dir="rtl"] .lats3W_rowText { padding-right: 0 !important; padding-left: 48px !important }
+html[dir="rtl"] .mufS8W_card { left: auto; right: 0 }
+html[dir="rtl"] ._7yHdaG_header { text-align: right !important }
+html[dir="rtl"] ._7yHdaG_row { padding-right: 12px !important; padding-left: 5px !important }
+html[dir="rtl"] .T1PP_q_rowText { padding-right: 0 !important; padding-left: 48px !important }
+html[dir="rtl"] .pXSMma_body>.pXSMma_workspaceRow { padding-left: 0 !important; padding-right: 8px !important }
+html[dir="rtl"] .wSkVaW_header { padding-right: 20px !important; padding-left: 28px !important }
+html[dir="rtl"] .wSkVaW_headerUtilities { margin-left: 0 !important; margin-right: 20px !important }
+html[dir="rtl"] .wSkVaW_headerCorner { margin-left: -16px !important; margin-right: 8px !important }
+html[dir="rtl"] .wSkVaW_tabs { padding-left: 0 !important; padding-right: 8px !important }
+html[dir="rtl"] .wSkVaW_widthHandle[data-side=left] { right: auto; left: calc(50% + var(--dsh-chat-content-width) / 2 + 24px) }
+html[dir="rtl"] .wSkVaW_widthHandle[data-side=right] { left: auto; right: calc(50% + var(--dsh-chat-content-width) / 2 + 24px) }
+html[dir="rtl"] .wSkVaW_widthHandle[data-side=left]:after { right: auto; left: 16px }
+html[dir="rtl"] .wSkVaW_widthHandle[data-side=right]:after { left: auto; right: 16px }
+html[dir="rtl"] .wSkVaW_scrollBody { margin-right: 0 !important; margin-left: 2px !important }
+html[dir="rtl"] .wSkVaW_scrollBody:has([data-conversation-composer-overlay])>.wSkVaW_composerSeat { right: 0; left: var(--dsh-scrollbar-width) }
+html[dir="rtl"] .wSkVaW_heroWorkspaceRow { padding-right: 20px !important; padding-left: 16px !important }
+html[dir="rtl"] .JObwrW_panel { right: auto; left: 0 }
+html[dir="rtl"] .JObwrW_figures { margin-left: 0 !important; margin-right: auto !important }
+html[dir="rtl"] .JObwrW_swatch { margin-right: 0 !important; margin-left: 6px !important }
+html[dir="rtl"] .Sh0Q9G_trigger { padding-right: 8px !important; padding-left: 4px !important }
+html[dir="rtl"] .uV2eYG_scroll { margin-right: 0 !important; margin-left: 4px !important }
+html[dir="rtl"] .uV2eYG_input { padding-right: 14px !important; padding-left: 8px !important }
+html[dir="rtl"] .uV2eYG_placeholder { right: 14px; left: 8px }
+html[dir="rtl"] .uV2eYG_trailing { margin-left: 0 !important; margin-right: auto !important }
+html[dir="rtl"] .uV2eYG_retry { margin-left: 0 !important; margin-right: 8px !important }
+html[dir="rtl"] .lXshSW_header { text-align: right !important }
+html[dir="rtl"] .cvtE3a_icon { margin-right: 0 !important; margin-left: 8px !important }
+html[dir="rtl"] .cvtE3a_status { margin-left: 0 !important; margin-right: 8px !important }
+html[dir="rtl"] .cvtE3a_inspect { margin-left: 0 !important; margin-right: 4px !important }
+html[dir="rtl"] .gNWCoW_purpose { margin-left: 0 !important; margin-right: 8px !important }
+html[dir="rtl"] .gNWCoW_requestError { margin-left: 0 !important; margin-right: 8px !important }
+html[dir="rtl"] .gNWCoW_readout { margin-left: 0 !important; margin-right: 8px !important }
+html[dir="rtl"] .gNWCoW_panelHint { margin-right: 4px !important; margin-left: 0 !important }
+html[dir="rtl"] .gNWCoW_approvalPrompt { margin-left: 0 !important; margin-right: 8px !important }
+html[dir="rtl"] .gNWCoW_notice { margin-left: 0 !important; margin-right: 8px !important }
+html[dir="rtl"] .gNWCoW_sourceCard { margin-right: 4px !important; margin-left: 0 !important }
+html[dir="rtl"] .gNWCoW_codeSection { margin-right: 4px !important; margin-left: 0 !important }
+html[dir="rtl"] .gNWCoW_inspectButton { margin-right: 4px !important; margin-left: 0 !important }
+html[dir="rtl"] .Nqubda_badge { padding-right: 8px !important; padding-left: 10px !important }
+html[dir="rtl"] .Nqubda_badgeCount { margin-left: 0 !important; margin-right: auto !important }
+html[dir="rtl"] .Nqubda_transitionActions { margin-left: 0 !important; margin-right: auto !important }
+html[dir="rtl"] .Nqubda_doubleCheck svg:first-child { left: auto; right: 0 }
+html[dir="rtl"] .Nqubda_doubleCheck svg:last-child { left: auto; right: 5px }
+html[dir="rtl"] ._93YTAG_summary { margin-left: 0 !important; margin-right: 8px !important }
+html[dir="rtl"] .nyYjTG_chevron { border-left-width: 0 !important; border-left-style: none !important; border-left-color: currentColor !important; border-right-width: .5px !important; border-right-style: solid !important; border-right-color: var(--dsw-alias-border-l3) !important }
+html[dir="rtl"] .ZuhsRW_header { padding-right: 24px !important; padding-left: 14px !important }
+html[dir="rtl"] .ZuhsRW_crumbBar { margin-left: 0 !important; margin-right: -9px !important }
+html[dir="rtl"] .ZuhsRW_content { padding-right: 24px !important; padding-left: 16px !important }
+html[dir="rtl"] .ZuhsRW_column { padding-right: 0 !important; padding-left: 8px !important }
+html[dir="rtl"] .ZuhsRW_row { text-align: right !important }
+html[dir="rtl"] .ZuhsRW_status, html[dir="rtl"] .ZuhsRW_error { padding-right: 4px !important; padding-left: 120px !important }
+html[dir="rtl"] .ZuhsRW_loadingFloat { right: auto; left: 16px }
+html[dir="rtl"] .nLMEza_bar { padding-right: 12px !important; padding-left: 5px !important }
+html[dir="rtl"] ._3e4SsG_item { text-align: right !important }
+html[dir="rtl"] ._3e4SsG_trailing { margin-left: 0 !important; margin-right: auto !important }
+html[dir="rtl"] .QsffPG_menu { left: auto; right: 0 }
+html[dir="rtl"] .pI_x6G_sidebarCol { border-right-width: 0 !important; border-right-style: none !important; border-right-color: currentColor !important; border-left-width: .5px !important; border-left-style: solid !important; border-left-color: var(--dsw-alias-border-l3) !important }
+html[dir="rtl"] .pI_x6G_handle { transition: right var(--ds-transition-duration-slow) var(--ds-ease-in-out) !important; margin-left: 0 !important; margin-right: -4px !important }
+html[dir="rtl"] ._8_XoUG_failure { padding-left: 0 !important; padding-right: 4px !important }
+html[dir="rtl"] ._7KE1Ra_trigger { padding-right: 8px !important; padding-left: 4px !important }
+html[dir="rtl"] ._7KE1Ra_option { text-align: right !important }
+html[dir="rtl"] ._7KE1Ra_cell { text-align: right !important }
+html[dir="rtl"] ._7KE1Ra_cellValue { text-align: left !important }
+html[dir="rtl"] .CAgGvG_main { padding-right: 7px !important; padding-left: 6px !important }
+html[dir="rtl"] .CAgGvG_chevron { border-left-width: 0 !important; border-left-style: none !important; border-left-color: currentColor !important; padding-right: 4px !important; padding-left: 6px !important; border-right-width: .5px !important; border-right-style: solid !important; border-right-color: var(--dsw-alias-border-l4) !important }
+html[dir="rtl"] .oY77xG_rowText { padding-right: 0 !important; padding-left: 48px !important }
+html[dir="rtl"] .-\\34 LnlG_count { margin-left: 0 !important; margin-right: 2px !important }
+html[dir="rtl"] .VOzbGW_trigger { padding-right: 8px !important; padding-left: 10px !important }
+html[dir="rtl"] .VOzbGW_navCell { text-align: right !important; padding-right: 12px !important; padding-left: 16px !important }
+html[dir="rtl"] .VOzbGW_header { padding-right: 10px !important; padding-left: 14px !important }
+html[dir="rtl"] .VOzbGW_actions { margin-left: 0 !important; margin-right: auto !important }
+html[dir="rtl"] .zGbnIq_rowActions { margin-left: 0 !important; margin-right: auto !important }
+html[dir="rtl"] .zGbnIq_customizedSummary { margin-left: 0 !important; margin-right: -4px !important }
+html[dir="rtl"] .qSYn7G_search>svg { left: auto; right: 12px }
+html[dir="rtl"] .qSYn7G_search input { padding-right: 36px !important; padding-left: 34px !important }
+html[dir="rtl"] .qSYn7G_cardContent { text-align: right !important }
+html[dir="rtl"] .qSYn7G_headerEnd { margin-left: 0 !important; margin-right: auto !important }
+html[dir="rtl"] .qSYn7G_groupToggle { text-align: right !important }
+html[dir="rtl"] .qSYn7G_groupSub { margin-right: 20px !important; margin-left: 0 !important }
+html[dir="rtl"] .YyYd_a_header { text-align: right !important }
+html[dir="rtl"] .dhJKeW_header { padding-right: 16px !important; padding-left: 6px !important }
+html[dir="rtl"] .dhJKeW_path { margin-right: 0 !important; margin-left: 12px !important }
+html[dir="rtl"] .dhJKeW_pathText { margin-right: 0 !important; margin-left: auto !important }
+html[dir="rtl"] .dhJKeW_retry { padding-right: 12px !important; padding-left: 14px !important }
+html[dir="rtl"] .k-1LKG_header { padding-right: 16px !important; padding-left: 6px !important }
+html[dir="rtl"] .k-1LKG_path { margin-right: 0 !important; margin-left: 12px !important }
+html[dir="rtl"] .k-1LKG_pathText { margin-right: 0 !important; margin-left: auto !important }
+html[dir="rtl"] .k-1LKG_body { margin-right: 0 !important; padding-right: 8px !important; padding-left: 0 !important; margin-left: 2px !important }
+html[dir="rtl"] .k-1LKG_level .k-1LKG_level { padding-left: 0 !important; padding-right: 18px !important }
+html[dir="rtl"] .k-1LKG_row { text-align: right !important }
+html[dir="rtl"] .geFEbW_entry { text-align: right !important }
+html[dir="rtl"] .P3OORG_panel { border-left-width: 0 !important; border-left-style: none !important; border-left-color: currentColor !important; right: auto; left: 0; border-right-width: .5px !important; border-right-style: solid !important; border-right-color: var(--dsw-alias-border-l4) !important }
+html[dir="rtl"] .hHd-Xa_logoRow { padding-right: 4px !important; padding-left: 0 !important }
+html[dir="rtl"] .hHd-Xa_panelRow { text-align: right !important }
+html[dir="rtl"] .hHd-Xa_regionArea { margin-left: calc(-1 * var(--dsh-sidebar-inline-padding)) !important; margin-right: -4px !important; padding-left: 0 !important; padding-right: 4px !important }
+html[dir="rtl"] .hHd-Xa_collapsed .hHd-Xa_regionArea { padding-right: 0 !important }
+@keyframes iWrAna_dsh-skill-row-sweep{
+0% { left: auto; right: -300px }
+}
+@keyframes iWrAna_dsh-skill-row-sweep{
+90%,to { left: auto; right: 100% }
+}
+html[dir="rtl"] .iWrAna_leading { margin-right: 0 !important; margin-left: 6px !important }
+html[dir="rtl"] .iWrAna_instructionsCard { margin-right: 4px !important; margin-left: 0 !important }
+html[dir="rtl"] .iWrAna_inspectButton { margin-right: 4px !important; margin-left: 0 !important }
+html[dir="rtl"] .ZKlsPq_switcherRoot { margin-left: 0 !important; margin-right: 6px !important }
+html[dir="rtl"] .ZKlsPq_menu>.ZKlsPq_node { margin-left: 0 !important; margin-right: -3px !important }
+html[dir="rtl"] .ZKlsPq_row { text-align: right !important; padding-right: 11px !important; padding-left: 8px !important }
+html[dir="rtl"] .ZKlsPq_metrics { text-align: left !important }
+html[dir="rtl"] .ZKlsPq_children { margin-left: 0 !important; padding-left: 0 !important; margin-right: 18px !important; padding-right: 4px !important }
+html[dir="rtl"] .ZKlsPq_children>.ZKlsPq_node:before { left: auto; right: -4px }
+html[dir="rtl"] .bVCLcG_rowText { padding-right: 0 !important; padding-left: 48px !important }
+html[dir="rtl"] .bVCLcG_arrows { right: auto; left: 8px }
+html[dir="rtl"] .fsXYAq_card { margin-right: 4px !important; margin-left: 0 !important }
+html[dir="rtl"] .fsXYAq_questionList { padding-left: 0 !important; padding-right: 20px !important }
+@keyframes o3BgMG_dsh-tool-row-sweep{
+0% { left: auto; right: -300px }
+}
+@keyframes o3BgMG_dsh-tool-row-sweep{
+90%,to { left: auto; right: 100% }
+}
+html[dir="rtl"] .o3BgMG_summarySuffix { margin-left: 0 !important; margin-right: 4px !important }
+html[dir="rtl"] .o3BgMG_diffStat { margin-left: 0 !important; margin-right: 10px !important }
+html[dir="rtl"] .o3BgMG_fileLink { text-align: right !important }
+html[dir="rtl"] .o3BgMG_inspectButton { margin-right: 4px !important; margin-left: 0 !important }
+html[dir="rtl"] .o3BgMG_ioCard { margin-right: 4px !important; margin-left: 0 !important }
+html[dir="rtl"] .o3BgMG_codeBody, html[dir="rtl"] .o3BgMG_terminalBody, html[dir="rtl"] .o3BgMG_diffBody, html[dir="rtl"] .o3BgMG_readBody, html[dir="rtl"] .o3BgMG_imageBody, html[dir="rtl"] .o3BgMG_searchBody, html[dir="rtl"] .o3BgMG_webBody { margin-right: 4px !important; margin-left: 0 !important }
+html[dir="rtl"] .o3BgMG_searchRecovery { margin-right: 4px !important; margin-left: 0 !important }
+html[dir="rtl"] .ztWv_q_subCalls { border-left-width: 0 !important; border-left-style: none !important; border-left-color: currentColor !important; margin-right: 22px !important; margin-left: 0 !important; padding-left: 0 !important; padding-right: 8px !important; border-right-width: .5px !important; border-right-style: solid !important; border-right-color: var(--dsw-alias-border-l2) !important }
+html[dir="rtl"] .CY-8Ka_terminal { margin-right: 4px !important; margin-left: 0 !important }
+html[dir="rtl"] .CY-8Ka_ioCard { margin-right: 4px !important; margin-left: 0 !important }
+@keyframes CY-8Ka_dsh-bash-row-sweep{
+0% { left: auto; right: -300px }
+}
+@keyframes CY-8Ka_dsh-bash-row-sweep{
+90%,to { left: auto; right: 100% }
+}
+html[dir="rtl"] .CY-8Ka_leading { margin-right: 0 !important; margin-left: 6px !important }
+html[dir="rtl"] .CY-8Ka_inspectButton { margin-right: 4px !important; margin-left: 0 !important }
+html[dir="rtl"] .Y0dWHa_table th { text-align: right !important }
+html[dir="rtl"] .Y0dWHa_eventHeader { text-align: left !important; padding-right: 0 !important; padding-left: 4px !important }
+html[dir="rtl"] .Y0dWHa_requestBoundaryControl { left: auto; right: calc(var(--request-boundary-base-left) + var(--request-boundary-offset,0px)) }
+html[dir="rtl"] .Y0dWHa_requestBoundaryControl:after { left: auto; right: 17px }
+html[dir="rtl"] .Y0dWHa_turnRail, html[dir="rtl"] .Y0dWHa_selectionRail { left: auto; right: 0 }
+html[dir="rtl"] .Y0dWHa_event { padding-left: 4px !important; padding-right: 36px !important }
+html[dir="rtl"] .Y0dWHa_turnLabel { border-bottom-right-radius: 0 !important; border-bottom-left-radius: 2px !important; left: auto; right: 0 }
+html[dir="rtl"] .Y0dWHa_content { padding-left: 0 !important; padding-right: 4px !important }
+@container Y0dWHa_trajectory-table (width<=620px){
+html[dir="rtl"] .Y0dWHa_event { padding-left: 3px !important; padding-right: 28px !important }
+}
+@media (prefers-reduced-motion:no-preference){
+html[dir="rtl"] .Y0dWHa_requestBoundaryControl { transition-property: right !important }
+}
+html[dir="rtl"] .Y0dWHa_collapsedTurnEllipsis { margin-right: 0 !important; margin-left: 6px !important }
+html[dir="rtl"] .Y0dWHa_toolCallPayload { margin-left: 0 !important; margin-right: 7px !important }
+html[dir="rtl"] .Y0dWHa_table tbody tr[data-kind=subtool] .Y0dWHa_content { padding-left: 0 !important; padding-right: 26px !important }
+html[dir="rtl"] .Y0dWHa_arrow { margin-right: 0 !important; margin-left: 8px !important }
+html[dir="rtl"] .Y0dWHa_details { border-left-width: 0 !important; border-left-style: none !important; border-left-color: currentColor !important; border-right-width: .5px !important; border-right-style: solid !important; border-right-color: var(--dsw-alias-border-l2) !important }
+html[dir="rtl"] .Y0dWHa_detailsResizeHandle { left: auto; right: -4px }
+html[dir="rtl"] .Y0dWHa_detailsHeader { padding-right: 12px !important; padding-left: 8px !important }
+html[dir="rtl"] .Y0dWHa_compactedSummary .Y0dWHa_markdownPayload { padding-right: 0 !important; padding-left: 18px !important }
+html[dir="rtl"] .Y0dWHa_overview>.Y0dWHa_requestTokenDetail dt { padding-left: 0 !important; padding-right: 12px !important }
+html[dir="rtl"] .Y0dWHa_overviewHeading { padding-right: 14px !important; padding-left: 0 !important }
+html[dir="rtl"] .Y0dWHa_thinkingQuote { border-left-width: 0 !important; border-left-style: none !important; border-left-color: currentColor !important; margin-right: 12px !important; margin-left: 14px !important; padding-left: 0 !important; padding-right: 6px !important; border-right-width: 2px !important; border-right-style: solid !important; border-right-color: var(--dsw-alias-markdown-citation) !important }
+html[dir="rtl"] .Y0dWHa_schemaTree { margin-right: 0 !important; margin-left: 6px !important }
+html[dir="rtl"] .Y0dWHa_assistantToolCallButton { margin-left: 0 !important; margin-right: -4px !important }
+html[dir="rtl"] .Y0dWHa_assistantToolCallIcon { margin-right: 0 !important; margin-left: 5px !important }
+html[dir="rtl"] .Y0dWHa_assistantToolCallName { margin-right: 0 !important; margin-left: 5px !important }
+html[dir="rtl"] .Y0dWHa_toolCatalogDefinition { padding-right: 29px !important; padding-left: 0 !important }
+html[dir="rtl"] .Y0dWHa_toolCatalogFullDescription { padding-right: 0 !important; padding-left: 14px !important }
+html[dir="rtl"] .Y0dWHa_toolCatalogTree { margin-left: 6px !important; margin-right: -14px !important }
+@media (width<=760px){
+html[dir="rtl"] .Y0dWHa_details { border-left-color: currentColor !important; right: auto; left: 0; border-right-color: var(--dsw-alias-border-l3) !important }
+}
+html[dir="rtl"] .fV0t5q_controlThumb { left: auto; right: 2px }
+html[dir="rtl"] .fV0t5q_search { margin-left: 0 !important; margin-right: auto !important }
+html[dir="rtl"] ._1p9O6q_labels { border-right-width: 0 !important; border-right-style: none !important; border-right-color: currentColor !important; border-left-width: .5px !important; border-left-style: solid !important; border-left-color: var(--dsw-alias-border-l1) !important }
+html[dir="rtl"] ._1p9O6q_labels span { text-align: left !important; right: auto; left: 3px }
+html[dir="rtl"] ._1p9O6q_earlierHistory { padding-left: 0 !important; left: auto; right: 0; padding-right: 3px !important }
+html[dir="rtl"] ._1p9O6q_empty { left: auto; right: 50% }
+html[dir="rtl"] ._1p9O6q_lanes { left: auto; right: var(--trajectory-domain-left) }
+html[dir="rtl"] ._1p9O6q_turnBoundaries { left: auto; right: var(--trajectory-domain-left) }
+@media (prefers-reduced-motion:no-preference){
+html[dir="rtl"] ._1p9O6q_lanes[data-animate-viewport=true], html[dir="rtl"] ._1p9O6q_turnBoundaries[data-animate-viewport=true] { transition: right .18s ease-out !important }
+}
+html[dir="rtl"] ._1p9O6q_turnBoundary { left: auto; right: var(--trajectory-turn-left) }
+html[dir="rtl"] ._1p9O6q_span { left: auto; right: calc(var(--trajectory-span-left) + var(--trajectory-span-gap)) }
+html[dir="rtl"] ._1p9O6q_selection { left: auto; right: var(--trajectory-selection-left) }
+html[dir="rtl"] ._1p9O6q_selectionEdges { left: auto; right: var(--trajectory-selection-left) }
+html[dir="rtl"] ._1p9O6q_hoverLine { left: auto; right: clamp(0px, calc(var(--trajectory-hover-left) - 1px), calc(100% - 2px)) }
+html[dir="rtl"] ._1p9O6q_selectionEdges:before { left: auto; right: 0 }
+html[dir="rtl"] ._1p9O6q_selectionEdges:after { right: auto; left: 0 }
+html[dir="rtl"] .Mbwy4a_header { padding-right: 24px !important; padding-left: 16px !important }
+html[dir="rtl"] .Mbwy4a_option { text-align: right !important; padding-right: 8px !important; padding-left: 12px !important }
+html[dir="rtl"] .Mbwy4a_customRow { padding-right: 8px !important; padding-left: 12px !important }
+html[dir="rtl"] .Mbwy4a_footer { padding-right: 18px !important; padding-left: 10px !important }
+html[dir="rtl"] .Mbwy4a_feedback { text-align: left !important }
+@media (width<=720px){
+html[dir="rtl"] .Mbwy4a_header { padding-right: 18px !important; padding-left: 12px !important }
+}
+html[dir="rtl"] .DBuyfa_runLeading { margin-left: 0 !important }
+html[dir="rtl"] .DBuyfa_phaseLeading { margin-left: 0 !important }
+html[dir="rtl"] .DBuyfa_phaseStatus { text-align: left !important }
+html[dir="rtl"] .DBuyfa_phaseList { padding-right: 16px !important; padding-left: 0 !important }
+html[dir="rtl"] .DBuyfa_members { padding-right: 16px !important; padding-left: 0 !important }
+html[dir="rtl"] .DBuyfa_memberRow, html[dir="rtl"] .DBuyfa_memberButton { text-align: right !important }
+html[dir="rtl"] .DBuyfa_memberStatus { text-align: left !important }
+@media (width<=560px){
+html[dir="rtl"] .DBuyfa_phaseList, html[dir="rtl"] .DBuyfa_members { padding-left: 0 !important; padding-right: 12px !important }
+}
+html[dir="rtl"] .YDXeBa_searchResultRow { text-align: right !important }
+html[dir="rtl"] .YDXeBa_searchResultTitle { margin-left: 0 !important; margin-right: 4px !important }
+html[dir="rtl"] .YDXeBa_searchResultMeta { margin-left: 0 !important; margin-right: 20px !important }
+html[dir="rtl"] .YDXeBa_sessionRow .YDXeBa_title { margin-right: 4px !important; margin-left: 6px !important }
+html[dir="rtl"] .YDXeBa_flatSessionRowWithoutStatus .YDXeBa_title { margin-right: 0 !important }
+html[dir="rtl"] .YDXeBa_scheduleIndicator { margin-right: 0 !important; margin-left: 6px !important }
+html[dir="rtl"] .YDXeBa_searchScheduleIndicator { margin-left: 0 !important; margin-right: 4px !important }
+html[dir="rtl"] .bhn1Oq_root { padding-right: 0 !important; padding-left: var(--dsh-session-list-edge-inset) !important }
+html[dir="rtl"] .bhn1Oq_root.bhn1Oq_rail { padding-left: 0 !important }
+html[dir="rtl"] .bhn1Oq_sectionHeader { padding-left: 0 !important; padding-right: 4px !important }
+html[dir="rtl"] .bhn1Oq_root:not(.bhn1Oq_rail) .bhn1Oq_sectionHeader { margin-right: 0 !important; margin-left: -4px !important }
+html[dir="rtl"] .bhn1Oq_sectionLabelHidden { margin-right: 0 !important; margin-left: -4px !important }
+html[dir="rtl"] .bhn1Oq_searchSlot { margin-left: 0 !important; margin-right: auto !important; padding-right: 0 !important }
+html[dir="rtl"] .bhn1Oq_searchSlotExpanded { padding-right: 0 !important }
+html[dir="rtl"] .bhn1Oq_searchExpanded { padding-right: 0 !important; padding-left: 4px !important }
+html[dir="rtl"] .bhn1Oq_searchExpanded .bhn1Oq_searchInput { margin-left: 0 !important; margin-right: -2px !important }
+html[dir="rtl"] .bhn1Oq_rail .bhn1Oq_sectionHeader { padding-right: 0 !important }
+html[dir="rtl"] .bhn1Oq_listArea { margin-left: calc(-1 * var(--dsh-session-list-edge-inset)) !important; margin-right: -4px !important; padding-left: 0 !important; padding-right: 4px !important }
+html[dir="rtl"] .bhn1Oq_rail .bhn1Oq_listArea { padding-right: 0 !important }
+html[dir="rtl"] .bhn1Oq_fade { left: var(--dsh-session-list-edge-inset); right: 0 }
+html[dir="rtl"] .bhn1Oq_list { margin-left: var(--dsh-session-list-scrollbar-offset) !important; margin-right: -4px !important; padding-left: calc(var(--dsh-session-list-edge-inset) - var(--dsh-session-list-scrollbar-width) - var(--dsh-session-list-scrollbar-offset)) !important; padding-right: 4px !important }
+html[dir="rtl"] .bhn1Oq_listTopDropIndicator { left: var(--dsh-session-list-edge-inset); right: 0 }
+html[dir="rtl"] .bhn1Oq_sessionOverflowButton { text-align: right !important; padding-right: 28px !important; padding-left: 12px !important }

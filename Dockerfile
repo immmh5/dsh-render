@@ -72,10 +72,31 @@ EXPOSE 3080
 # so /opt/dsh-profile is baked here and start.sh copies it into $DSH_HOME on
 # boot. dsh's own @deepseek-ai/* packages are supplied via the module-fallback
 # symlinks created at boot, so only third-party deps live here.
+#
+# The three dsh-kit plugins (dsh-addons-manager, dsh-arabic, dsh-rtl) are
+# vendored under /opt/dsh-plugins and pulled in as file: deps. Each ships a
+# prebuilt lib/*.js, so no build step is needed here; the dsh-rtl harness
+# patches and the dsh-arabic addon arabicization run below and again at boot
+# (both are idempotent, so they are safe to re-run after a self-update).
+COPY plugins/ /opt/dsh-plugins/
 COPY profile/package.json /opt/dsh-profile/package.json
 RUN cd /opt/dsh-profile \
   && pnpm install --no-frozen-lockfile --prod \
   && rm -rf /opt/dsh-profile/node_modules/.pnpm-store
+
+# dsh-rtl: patch the harness bundles for correct RTL geometry (drag handles,
+# rail edges, tooltip/dropdown placement). Anchors are validated against this
+# exact dsh pin; the script is idempotent and fails loudly if a bundle moved.
+# The harness tree is the global npm install (self-update only syncs /app and
+# the fix scripts, so this never needs re-applying after a boot-time pull).
+# Also arabicize telegram-duty's own strings (dsh-arabic patch_telegram.py),
+# which is path-flexible and a no-op for any add-on that is not installed.
+RUN cd /opt/dsh-plugins/dsh-rtl \
+  && NO_RESTART=1 python3 patch_harness.py \
+     --harness /usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai \
+  && cd /opt/dsh-plugins/dsh-arabic \
+  && python3 patch_telegram.py --profile /opt/dsh-profile \
+  && python3 patch_addons.py --profile /opt/dsh-profile
 
 COPY start.sh /usr/local/bin/start.sh
 COPY nginx.conf /app/nginx.conf

@@ -1,0 +1,28 @@
+/* Layout drag handles only: their inline `left` is mirrored into
+   --dsh-h-start by the driver, which RTL consumes as `right`. Scoped to the
+   two handle sides so tooltips and the chat width handles keep their own
+   inline positioning. */
+html[dir="rtl"] [data-side="sidebar"],
+html[dir="rtl"] [data-side="rightbar"] {
+	left: auto !important;
+	right: var(--dsh-h-start, 0px) !important;
+	margin-left: 0 !important;
+	margin-right: -4px !important;
+	transition: right var(--ds-transition-duration-slow, 0.25s) var(--ds-ease-in-out, ease) !important;
+}
+
+/* A tooltip flipped to the anchor's left side is centred like the right one. */
+html[dir="rtl"] [role="tooltip"][data-side="left"] {
+	transform: translateY(-50%);
+}
+
+html[dir="rtl"] [data-dsh-text-zone="ltr"] {
+	direction: ltr !important;
+	text-align: left !important;
+	unicode-bidi: isolate;
+}
+
+html[dir="rtl"] .dshrtl_rowText {
+	padding-right: 0 !important;
+	padding-left: 48px !important;
+}

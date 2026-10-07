@@ -1,0 +1,1668 @@
+dsh-rtl mirror report
+css blobs scanned  : 132
+dsh.client packages: 65
+rules mirrored     : 325
+ltr island classes : 8
+skipped            : 29
+
+MIRRORED
+========
+
+frontend:index-DPX2bQLO.css
+  ._leading_luwio_29
+  html[dir="rtl"] ._leading_luwio_29 { margin-right: 0 !important; margin-left: 6px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+frontend:index-DPX2bQLO.css
+  ._list_1nxmc_8
+  html[dir="rtl"] ._list_1nxmc_8:not(._portal_1nxmc_44) { left: auto; right: 0 }
+  notes: move left -> right, reset left
+
+frontend:index-DPX2bQLO.css
+  ._portal_1nxmc_44
+  html[dir="rtl"] ._portal_1nxmc_44 { right: auto }
+  notes: move left -> right, reset left
+
+frontend:index-DPX2bQLO.css
+  ._alignEnd_1nxmc_57
+  html[dir="rtl"] ._alignEnd_1nxmc_57:not(._portal_1nxmc_44) { left: 0; right: auto }
+  notes: swap left <-> right
+
+frontend:index-DPX2bQLO.css
+  ._item_1nxmc_92
+  html[dir="rtl"] ._item_1nxmc_92 { text-align: right !important }
+  notes: value text-align: left -> right
+
+frontend:index-DPX2bQLO.css
+  ._submenu_1nxmc_9
+  html[dir="rtl"] ._submenu_1nxmc_9 { left: auto; right: calc(100% + 10px) }
+  notes: move left -> right, reset left
+
+frontend:index-DPX2bQLO.css
+  ._submenu_1nxmc_9:before
+  html[dir="rtl"] ._submenu_1nxmc_9:before { left: auto; right: -10px }
+  notes: move left -> right, reset left
+
+frontend:index-DPX2bQLO.css
+  ._header_w1urq_45
+  html[dir="rtl"] ._header_w1urq_45 { padding-right: 24px !important; padding-left: 14px !important }
+  notes: swap padding-left <-> padding-right
+
+frontend:index-DPX2bQLO.css
+  ._label_1ycze_51
+  html[dir="rtl"] ._label_1ycze_51 { text-align: right !important }
+  notes: value text-align: left -> right
+
+frontend:index-DPX2bQLO.css
+  ._dots_1ycze_78
+  html[dir="rtl"] ._dots_1ycze_78 { text-align: right !important }
+  notes: value text-align: left -> right
+
+frontend:index-DPX2bQLO.css
+  ._refIcon_z12h9_36
+  html[dir="rtl"] ._refIcon_z12h9_36 { margin-right: 0 !important; margin-left: 4px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+frontend:index-DPX2bQLO.css
+  ._expandedTopLevel_4qrvp_39
+  html[dir="rtl"] ._expandedTopLevel_4qrvp_39 { padding-right: 14px !important; padding-left: 8px !important }
+  notes: swap padding-left <-> padding-right
+
+frontend:index-DPX2bQLO.css
+  ._row_4qrvp_55._topLevelBracket_4qrvp_46
+  html[dir="rtl"] ._row_4qrvp_55._topLevelBracket_4qrvp_46 { margin-right: 0 !important; padding-right: 0 !important }
+  notes: move margin-left -> margin-right, reset margin-left; move padding-left -> padding-right, reset padding-left
+
+frontend:index-DPX2bQLO.css
+  ._row_4qrvp_55
+  html[dir="rtl"] ._row_4qrvp_55 { padding-right: 10px !important; padding-left: 0 !important }
+  notes: swap padding-left <-> padding-right
+
+frontend:index-DPX2bQLO.css
+  ._label_4qrvp_95
+  html[dir="rtl"] ._label_4qrvp_95 { margin-right: 0 !important; margin-left: 3px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+frontend:index-DPX2bQLO.css
+  ._expander_4qrvp_78
+  html[dir="rtl"] ._expander_4qrvp_78 { left: auto; right: 0 }
+  notes: move left -> right, reset left
+
+frontend:index-DPX2bQLO.css
+  ._expander_4qrvp_78:before
+  html[dir="rtl"] ._expander_4qrvp_78:before { border-left-width: 0 !important; border-left-style: none !important; border-right-width: 6px !important; border-right-style: solid !important; border-right-color: currentColor !important }
+  notes: move border-left-width -> border-right-width, reset border-left-width; move border-left-style -> border-right-style, reset border-left-style; move border-left-color -> border-right-color, reset border-left-color
+
+frontend:index-DPX2bQLO.css
+  ._block_1gdtu_1
+  html[dir="rtl"] ._block_1gdtu_1 { padding-left: 0 !important; padding-right: var(--dsl-terminal-gutter) !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+frontend:index-DPX2bQLO.css
+  ._header_1gdtu_32
+  html[dir="rtl"] ._header_1gdtu_32 { margin-left: 0 !important; padding-right: var(--dsl-terminal-gutter) !important; padding-left: 14px !important; margin-right: calc(-1 * var(--dsl-terminal-gutter)) !important }
+  notes: move margin-left -> margin-right, reset margin-left; swap padding-left <-> padding-right
+
+frontend:index-DPX2bQLO.css
+  ._runState_1gdtu_91
+  html[dir="rtl"] ._runState_1gdtu_91 { left: auto; right: calc(-1 * var(--dsl-terminal-gutter) + 8px) }
+  notes: move left -> right, reset left
+
+frontend:index-DPX2bQLO.css
+  ._output_1gdtu_156
+  html[dir="rtl"] ._output_1gdtu_156 { padding-right: 0 !important; padding-left: 14px !important }
+  notes: swap padding-left <-> padding-right
+
+frontend:index-DPX2bQLO.css
+  ._expand_1gdtu_185
+  html[dir="rtl"] ._expand_1gdtu_185 { text-align: right !important }
+  notes: value text-align: left -> right
+
+frontend:index-DPX2bQLO.css
+  ._empty_1gdtu_201
+  html[dir="rtl"] ._empty_1gdtu_201 { padding-right: 0 !important; padding-left: 14px !important }
+  notes: swap padding-left <-> padding-right
+
+frontend:index-DPX2bQLO.css
+  ._gutter_onbk6_82
+  html[dir="rtl"] ._gutter_onbk6_82 { padding-right: 0 !important; text-align: left !important; padding-left: 14px !important }
+  notes: move padding-right -> padding-left, reset padding-right; value text-align: right -> left
+
+frontend:index-DPX2bQLO.css
+  ._expand_onbk6_97
+  html[dir="rtl"] ._expand_onbk6_97 { padding-right: var(--dsl-read-gutter) !important; padding-left: 0 !important; text-align: right !important }
+  notes: swap padding-left <-> padding-right; value text-align: left -> right
+
+frontend:index-DPX2bQLO.css
+  ._copyButton_12o37_16
+  html[dir="rtl"] ._copyButton_12o37_16 { right: auto; left: 12px }
+  notes: move right -> left, reset right
+
+frontend:index-DPX2bQLO.css
+  ._path_12o37_47
+  html[dir="rtl"] ._path_12o37_47 { padding-right: 0 !important; padding-left: 56px !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+frontend:index-DPX2bQLO.css
+  ._expand_12o37_79
+  html[dir="rtl"] ._expand_12o37_79 { text-align: right !important }
+  notes: value text-align: left -> right
+
+frontend:index-DPX2bQLO.css
+  ._body_1h7p4_43
+  html[dir="rtl"] ._body_1h7p4_43 { padding-right: 0 !important; padding-left: 14px !important }
+  notes: swap padding-left <-> padding-right
+
+frontend:index-DPX2bQLO.css
+  ._line_1h7p4_52
+  html[dir="rtl"] ._line_1h7p4_52 { padding-left: 0 !important; padding-right: 14px !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+frontend:index-DPX2bQLO.css
+  ._fileHeader_1h7p4_66
+  html[dir="rtl"] ._fileHeader_1h7p4_66 { text-align: right !important }
+  notes: value text-align: left -> right
+
+frontend:index-DPX2bQLO.css
+  ._expand_1h7p4_92
+  html[dir="rtl"] ._expand_1h7p4_92 { text-align: right !important }
+  notes: value text-align: left -> right
+
+frontend:index-DPX2bQLO.css
+  ._linkIcon_kcgor_92
+  html[dir="rtl"] ._linkIcon_kcgor_92 { margin-right: 0 !important; margin-left: 5px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+frontend:index-DPX2bQLO.css
+  ._markdown_kcgor_5 :where(ul,ol)
+  html[dir="rtl"] ._markdown_kcgor_5 :where(ul,ol) { padding-left: 0 !important; padding-right: 18px !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+frontend:index-DPX2bQLO.css
+  ._markdown_kcgor_5 :where(ul,ol) ol
+  html[dir="rtl"] ._markdown_kcgor_5 :where(ul,ol) ol { padding-right: 0 !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+frontend:index-DPX2bQLO.css
+  ._markdown_kcgor_5 blockquote
+  html[dir="rtl"] ._markdown_kcgor_5 blockquote { border-left-width: 0 !important; border-left-style: none !important; border-left-color: currentColor !important; padding-left: 0 !important; padding-right: 14px !important; border-right-width: 2px !important; border-right-style: solid !important; border-right-color: var(--dsw-alias-label-caption) !important }
+  notes: move padding-left -> padding-right, reset padding-left; move border-left-width -> border-right-width, reset border-left-width; move border-left-style -> border-right-style, reset border-left-style; move border-left-color -> border-right-color, reset border-left-color
+
+frontend:index-DPX2bQLO.css
+  ._markdown_kcgor_5 input[type=checkbox]
+  html[dir="rtl"] ._markdown_kcgor_5 input[type=checkbox] { margin-right: 0 !important; margin-left: 8px !important }
+  notes: swap margin-left <-> margin-right
+
+frontend:index-DPX2bQLO.css
+  ._tableScroll_kcgor_190 th:first-child,._tableScroll_kcgor_190 td:first-child
+  html[dir="rtl"] ._tableScroll_kcgor_190 th:first-child, html[dir="rtl"] ._tableScroll_kcgor_190 td:first-child { padding-right: 0 !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+frontend:index-DPX2bQLO.css
+  ._tableScroll_kcgor_190 td:last-child
+  html[dir="rtl"] ._tableScroll_kcgor_190 td:last-child { padding-left: 0 !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+frontend:index-DPX2bQLO.css
+  ._sources_19q7d_40
+  html[dir="rtl"] ._sources_19q7d_40 { padding-left: 0 !important; padding-right: 2.5em !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+frontend:index-DPX2bQLO.css
+  ._linkIcon_19q7d_65
+  html[dir="rtl"] ._linkIcon_19q7d_65 { margin-right: 0 !important; margin-left: 5px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+frontend:index-DPX2bQLO.css
+  ._splitRow_17p4l_24>._divider_17p4l_39:before
+  html[dir="rtl"] ._splitRow_17p4l_24>._divider_17p4l_39:before { left: auto; right: -.25px }
+  notes: move left -> right, reset left
+
+frontend:index-DPX2bQLO.css
+  ._tabStrip_17p4l_156
+  html[dir="rtl"] ._tabStrip_17p4l_156 { padding-right: 10px !important; padding-left: 6px !important }
+  notes: swap padding-left <-> padding-right
+
+frontend:index-DPX2bQLO.css
+  ._stripChrome_17p4l_212
+  html[dir="rtl"] ._stripChrome_17p4l_212 { margin-left: 0 !important; margin-right: 4px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+frontend:index-DPX2bQLO.css
+  ._tabClose_17p4l_314
+  html[dir="rtl"] ._tabClose_17p4l_314 { right: auto; left: 4px }
+  notes: move right -> left, reset right
+
+frontend:index-DPX2bQLO.css
+  ._menuItem_17p4l_460
+  html[dir="rtl"] ._menuItem_17p4l_460 { text-align: right !important }
+  notes: value text-align: left -> right
+
+frontend:index-DPX2bQLO.css
+  ._dockHint_17p4l_500[data-dockkit-dock-zone=left]
+  html[dir="rtl"] ._dockHint_17p4l_500[data-dockkit-dock-zone=left] { left: auto; right: 0 }
+  notes: move left -> right, reset left
+
+frontend:index-DPX2bQLO.css
+  ._dockHint_17p4l_500[data-dockkit-dock-zone=right]
+  html[dir="rtl"] ._dockHint_17p4l_500[data-dockkit-dock-zone=right] { right: auto; left: 0 }
+  notes: move right -> left, reset right
+
+frontend:index-DPX2bQLO.css
+  [data-dockkit-drop-zones=horizontal] ._dockHint_17p4l_500[data-dockkit-dock-zone=left]
+  html[dir="rtl"] [data-dockkit-drop-zones=horizontal] ._dockHint_17p4l_500[data-dockkit-dock-zone=left] { padding-right: 0 !important; padding-left: 4px !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+frontend:index-DPX2bQLO.css
+  [data-dockkit-drop-zones=horizontal] ._dockHint_17p4l_500[data-dockkit-dock-zone=right]
+  html[dir="rtl"] [data-dockkit-drop-zones=horizontal] ._dockHint_17p4l_500[data-dockkit-dock-zone=right] { padding-left: 0 !important; padding-right: 4px !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+frontend:index-DPX2bQLO.css
+  ._floatResize_17p4l_696
+  html[dir="rtl"] ._floatResize_17p4l_696 { right: auto; left: 0 }
+  notes: move right -> left, reset right
+
+frontend:index-DPX2bQLO.css
+  ._floatResize_17p4l_696:after
+  html[dir="rtl"] ._floatResize_17p4l_696:after { right: auto; border-right-width: 0 !important; border-right-style: none !important; border-right-color: currentColor !important; border-bottom-right-radius: 0 !important; left: 4px; border-left-width: 1.5px !important; border-left-style: solid !important; border-left-color: var(--dsw-alias-label-caption) !important; border-bottom-left-radius: 16px !important }
+  notes: move right -> left, reset right; move border-right-width -> border-left-width, reset border-right-width; move border-right-style -> border-left-style, reset border-right-style; move border-right-color -> border-left-color, reset border-right-color; move border-bottom-right-radius -> border-bottom-left-radius, reset border-bottom-right-radius
+
+frontend:vendor-BNsW4eBh.css
+  .katex .vlist-t2
+  html[dir="rtl"] .katex .vlist-t2 { margin-right: 0 !important; margin-left: -2px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+frontend:vendor-BNsW4eBh.css
+  .katex .msupsub
+  html[dir="rtl"] .katex .msupsub { text-align: right !important }
+  notes: value text-align: left -> right
+
+frontend:vendor-BNsW4eBh.css
+  .katex .llap>.inner
+  html[dir="rtl"] .katex .llap>.inner { right: auto; left: 0 }
+  notes: move right -> left, reset right
+
+frontend:vendor-BNsW4eBh.css
+  .katex .clap>.inner,.katex .rlap>.inner
+  html[dir="rtl"] .katex .clap>.inner, html[dir="rtl"] .katex .rlap>.inner { left: auto; right: 0 }
+  notes: move left -> right, reset left
+
+frontend:vendor-BNsW4eBh.css
+  .katex .clap>.inner>span
+  html[dir="rtl"] .katex .clap>.inner>span { margin-left: 50% !important; margin-right: -50% !important }
+  notes: swap margin-left <-> margin-right
+
+frontend:vendor-BNsW4eBh.css
+  .katex .sqrt>.root
+  html[dir="rtl"] .katex .sqrt>.root { margin-left: -.5555555556em !important; margin-right: .2777777778em !important }
+  notes: swap margin-left <-> margin-right
+
+frontend:vendor-BNsW4eBh.css
+  .katex .mtable .col-align-l>.vlist-t
+  html[dir="rtl"] .katex .mtable .col-align-l>.vlist-t { text-align: right !important }
+  notes: value text-align: left -> right
+
+frontend:vendor-BNsW4eBh.css
+  .katex .mtable .col-align-r>.vlist-t
+  html[dir="rtl"] .katex .mtable .col-align-r>.vlist-t { text-align: left !important }
+  notes: value text-align: right -> left
+
+frontend:vendor-BNsW4eBh.css
+  .katex .svg-align
+  html[dir="rtl"] .katex .svg-align { text-align: right !important }
+  notes: value text-align: left -> right
+
+frontend:vendor-BNsW4eBh.css
+  .katex .halfarrow-left
+  html[dir="rtl"] .katex .halfarrow-left { left: auto; right: 0 }
+  notes: move left -> right, reset left
+
+frontend:vendor-BNsW4eBh.css
+  .katex .halfarrow-right
+  html[dir="rtl"] .katex .halfarrow-right { right: auto; left: 0 }
+  notes: move right -> left, reset right
+
+frontend:vendor-BNsW4eBh.css
+  .katex .brace-left
+  html[dir="rtl"] .katex .brace-left { left: auto; right: 0 }
+  notes: move left -> right, reset left
+
+frontend:vendor-BNsW4eBh.css
+  .katex .brace-center
+  html[dir="rtl"] .katex .brace-center { left: auto; right: 25% }
+  notes: move left -> right, reset left
+
+frontend:vendor-BNsW4eBh.css
+  .katex .brace-right
+  html[dir="rtl"] .katex .brace-right { right: auto; left: 0 }
+  notes: move right -> left, reset right
+
+frontend:vendor-BNsW4eBh.css
+  .katex .cd-arrow-pad
+  html[dir="rtl"] .katex .cd-arrow-pad { padding-right: .27778em !important; padding-left: .55556em !important }
+  notes: swap padding-left <-> padding-right
+
+frontend:vendor-BNsW4eBh.css
+  .katex .angl
+  html[dir="rtl"] .katex .angl { border-right-width: 0 !important; border-right-style: none !important; margin-right: 0 !important; margin-left: .03889em !important; border-left-width: .049em !important; border-left-style: solid !important }
+  notes: move margin-right -> margin-left, reset margin-right; move border-right-width -> border-left-width, reset border-right-width; move border-right-style -> border-left-style, reset border-right-style
+
+frontend:vendor-BNsW4eBh.css
+  .katex .cd-label-left
+  html[dir="rtl"] .katex .cd-label-left { right: auto; text-align: right !important; left: calc(50% + .3em) }
+  notes: move right -> left, reset right; value text-align: left -> right
+
+frontend:vendor-BNsW4eBh.css
+  .katex .cd-label-right
+  html[dir="rtl"] .katex .cd-label-right { left: auto; text-align: left !important; right: calc(50% + .3em) }
+  notes: move left -> right, reset left; value text-align: right -> left
+
+frontend:vendor-BNsW4eBh.css
+  .katex-display>.katex>.katex-html>.tag
+  html[dir="rtl"] .katex-display>.katex>.katex-html>.tag { right: auto; left: 0 }
+  notes: move right -> left, reset right
+
+frontend:vendor-BNsW4eBh.css
+  .katex-display.leqno>.katex>.katex-html>.tag
+  html[dir="rtl"] .katex-display.leqno>.katex>.katex-html>.tag { left: auto; right: 0 }
+  notes: swap left <-> right
+
+frontend:vendor-BNsW4eBh.css
+  .katex-display.fleqn>.katex
+  html[dir="rtl"] .katex-display.fleqn>.katex { padding-left: 0 !important; text-align: right !important; padding-right: 2em !important }
+  notes: move padding-left -> padding-right, reset padding-left; value text-align: left -> right
+
+bundle:dsh-client-locale
+  .hVGvvW_rowText
+  html[dir="rtl"] .hVGvvW_rowText { padding-right: 0 !important; padding-left: 48px !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+bundle:dsh-client-ui-agent-preset
+  .SVAs4q_label
+  html[dir="rtl"] .SVAs4q_label { padding-right: 0 !important; padding-left: 2px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-agent-preset
+  .rtSEdW_brokenTip
+  html[dir="rtl"] .rtSEdW_brokenTip { text-align: right !important; left: auto; right: 0 }
+  notes: move left -> right, reset left; value text-align: left -> right
+
+bundle:dsh-client-ui-agent-preset
+  .rtSEdW_cardMain
+  html[dir="rtl"] .rtSEdW_cardMain { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-agent-preset
+  .rtSEdW_inUse
+  html[dir="rtl"] .rtSEdW_inUse { margin-left: 0 !important; margin-right: auto !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-agent-preset
+  .rtSEdW_iconButton:after
+  html[dir="rtl"] .rtSEdW_iconButton:after { left: auto; right: 50% }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-attachment
+  .JVDQca_remove
+  html[dir="rtl"] .JVDQca_remove { right: auto; left: 4px }
+  notes: move right -> left, reset right
+
+bundle:dsh-client-ui-attachment
+  .JVDQca_arrowLeft
+  html[dir="rtl"] .JVDQca_arrowLeft { left: auto; right: 4px }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-attachment
+  .JVDQca_arrowRight
+  html[dir="rtl"] .JVDQca_arrowRight { right: auto; left: 4px }
+  notes: move right -> left, reset right
+
+bundle:dsh-client-ui-attachment
+  .gSkjMW_card
+  html[dir="rtl"] .gSkjMW_card { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-attachment
+  .gSkjMW_retry
+  html[dir="rtl"] .gSkjMW_retry { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-attachment
+  .gSkjMW_remove
+  html[dir="rtl"] .gSkjMW_remove { right: auto; left: 6px }
+  notes: move right -> left, reset right
+
+bundle:dsh-client-ui-attachment
+  .gSkjMW_card:hover .gSkjMW_name,.gSkjMW_card:focus-within .gSkjMW_name
+  html[dir="rtl"] .gSkjMW_card:hover .gSkjMW_name, html[dir="rtl"] .gSkjMW_card:focus-within .gSkjMW_name { padding-right: 0 !important; padding-left: 18px !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+bundle:dsh-client-ui-attachment
+  .fNh4Da_close
+  html[dir="rtl"] .fNh4Da_close { right: auto; left: 20px }
+  notes: move right -> left, reset right
+
+bundle:dsh-client-ui-attachment
+  ._54WpYG_remove
+  html[dir="rtl"] ._54WpYG_remove { right: auto; left: 4px }
+  notes: move right -> left, reset right
+
+bundle:dsh-client-ui-chat
+  .Sixlwa_compactionButton
+  html[dir="rtl"] .Sixlwa_compactionButton { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-chat
+  .Sixlwa_compactionLeading
+  html[dir="rtl"] .Sixlwa_compactionLeading { margin-right: 0 !important; margin-left: 6px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-chat
+  .Sixlwa_compactionBody
+  html[dir="rtl"] .Sixlwa_compactionBody { padding-right: calc(22px + var(--dsh-content-font-delta,0px)) !important; padding-left: 0 !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-chat
+  .Sixlwa_retryDetails
+  html[dir="rtl"] .Sixlwa_retryDetails { padding-left: 0 !important; padding-right: 14px !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-chat
+  .Sixlwa_turnErrorTitle
+  html[dir="rtl"] .Sixlwa_turnErrorTitle { margin-right: 0 !important; margin-left: 6px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-chat
+  .Sixlwa_maxTokensTitle
+  html[dir="rtl"] .Sixlwa_maxTokensTitle { margin-right: 0 !important; margin-left: 6px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-chat
+  .XrJvXW_body
+  html[dir="rtl"] .XrJvXW_body { margin-right: calc(22px + var(--dsh-content-font-delta,0px)) !important; margin-left: 0 !important; padding-right: 12px !important; padding-left: 16px !important }
+  notes: swap margin-left <-> margin-right; swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-chat
+  .xzv4MW_timeStart
+  html[dir="rtl"] .xzv4MW_timeStart { padding-right: 0 !important; padding-left: 12px !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+bundle:dsh-client-ui-chat
+  .EvIC1a_turnStatusClock
+  html[dir="rtl"] .EvIC1a_turnStatusClock { margin-left: 0 !important; margin-right: 8px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-chat
+  .EvIC1a_toBottomSlot
+  html[dir="rtl"] .EvIC1a_toBottomSlot { padding-right: 0 !important; padding-left: max(0px, calc((100% - var(--dsh-chat-content-width)) / 2)) !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+bundle:dsh-client-ui-chat
+  .eGxaPq_frame
+  html[dir="rtl"] .eGxaPq_frame { right: auto; left: calc(12px - (var(--dsh-composer-side-clearance) + 16px)) }
+  notes: move right -> left, reset right
+
+bundle:dsh-client-ui-chat
+  .eGxaPq_mark
+  html[dir="rtl"] .eGxaPq_mark { right: auto; left: 0 }
+  notes: swap left <-> right
+
+bundle:dsh-client-ui-chat
+  .eGxaPq_preview
+  html[dir="rtl"] .eGxaPq_preview { right: auto; left: calc(100% + 10px) }
+  notes: move right -> left, reset right
+
+bundle:dsh-client-ui-chat
+  0%
+  0% { left: auto; right: -300px }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-chat
+  90%,to
+  90%,to { left: auto; right: 100% }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-chat
+  .lcKema_thinkBody
+  html[dir="rtl"] .lcKema_thinkBody { padding-right: calc(22px + var(--dsh-content-font-delta,0px)) !important; padding-left: 0 !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-chat
+  .hWmORq_body .md-table-wide
+  html[dir="rtl"] .hWmORq_body .md-table-wide { margin-left: 0 !important; padding-left: 0 !important; margin-right: calc(-1 * var(--dsh-table-lead)) !important; padding-right: var(--dsh-table-lead) !important }
+  notes: move margin-left -> margin-right, reset margin-left; move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-chat
+  .hWmORq_actions
+  html[dir="rtl"] .hWmORq_actions { margin-left: 0 !important; margin-right: -6px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-chat
+  0%
+  0% { left: auto; right: -300px }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-chat
+  90%,to
+  90%,to { left: auto; right: 100% }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-chat
+  ._5OnbHa_body
+  html[dir="rtl"] ._5OnbHa_body { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-chat
+  .l_V-RG_root
+  html[dir="rtl"] .l_V-RG_root { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-chat
+  .l_V-RG_chevron
+  html[dir="rtl"] .l_V-RG_chevron { margin-left: 0 !important; margin-right: 6px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-chat
+  .Q51KRG_root+.Q51KRG_root
+  html[dir="rtl"] .Q51KRG_root+.Q51KRG_root { margin-left: 0 !important; margin-right: -6px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-chat
+  .Q51KRG_root+.Q51KRG_root
+  html[dir="rtl"] .Q51KRG_root+.Q51KRG_root { margin-right: 0 !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-chat
+  .bRhRbq_details dd
+  html[dir="rtl"] .bRhRbq_details dd { text-align: left !important }
+  notes: value text-align: right -> left
+
+bundle:dsh-client-ui-chat
+  .TS9iAW_actions
+  html[dir="rtl"] .TS9iAW_actions { margin-left: 0 !important; margin-right: -6px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-chat
+  .lats3W_rowText
+  html[dir="rtl"] .lats3W_rowText { padding-right: 0 !important; padding-left: 48px !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+bundle:dsh-client-ui-commands
+  .mufS8W_card
+  html[dir="rtl"] .mufS8W_card { left: auto; right: 0 }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-conversation
+  ._7yHdaG_header
+  html[dir="rtl"] ._7yHdaG_header { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-conversation
+  ._7yHdaG_row
+  html[dir="rtl"] ._7yHdaG_row { padding-right: 12px !important; padding-left: 5px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-conversation
+  .T1PP_q_rowText
+  html[dir="rtl"] .T1PP_q_rowText { padding-right: 0 !important; padding-left: 48px !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+bundle:dsh-client-ui-conversation
+  .pXSMma_body>.pXSMma_workspaceRow
+  html[dir="rtl"] .pXSMma_body>.pXSMma_workspaceRow { padding-left: 0 !important; padding-right: 8px !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-conversation
+  .wSkVaW_header
+  html[dir="rtl"] .wSkVaW_header { padding-right: 20px !important; padding-left: 28px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-conversation
+  .wSkVaW_headerUtilities
+  html[dir="rtl"] .wSkVaW_headerUtilities { margin-left: 0 !important; margin-right: 20px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-conversation
+  .wSkVaW_headerCorner
+  html[dir="rtl"] .wSkVaW_headerCorner { margin-left: -16px !important; margin-right: 8px !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-conversation
+  .wSkVaW_tabs
+  html[dir="rtl"] .wSkVaW_tabs { padding-left: 0 !important; padding-right: 8px !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-conversation
+  .wSkVaW_widthHandle[data-side=left]
+  html[dir="rtl"] .wSkVaW_widthHandle[data-side=left] { right: auto; left: calc(50% + var(--dsh-chat-content-width) / 2 + 24px) }
+  notes: move right -> left, reset right
+
+bundle:dsh-client-ui-conversation
+  .wSkVaW_widthHandle[data-side=right]
+  html[dir="rtl"] .wSkVaW_widthHandle[data-side=right] { left: auto; right: calc(50% + var(--dsh-chat-content-width) / 2 + 24px) }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-conversation
+  .wSkVaW_widthHandle[data-side=left]:after
+  html[dir="rtl"] .wSkVaW_widthHandle[data-side=left]:after { right: auto; left: 16px }
+  notes: move right -> left, reset right
+
+bundle:dsh-client-ui-conversation
+  .wSkVaW_widthHandle[data-side=right]:after
+  html[dir="rtl"] .wSkVaW_widthHandle[data-side=right]:after { left: auto; right: 16px }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-conversation
+  .wSkVaW_scrollBody
+  html[dir="rtl"] .wSkVaW_scrollBody { margin-right: 0 !important; margin-left: 2px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-conversation
+  .wSkVaW_scrollBody:has([data-conversation-composer-overlay])>.wSkVaW_composerSeat
+  html[dir="rtl"] .wSkVaW_scrollBody:has([data-conversation-composer-overlay])>.wSkVaW_composerSeat { right: 0; left: var(--dsh-scrollbar-width) }
+  notes: swap left <-> right
+
+bundle:dsh-client-ui-conversation
+  .wSkVaW_heroWorkspaceRow
+  html[dir="rtl"] .wSkVaW_heroWorkspaceRow { padding-right: 20px !important; padding-left: 16px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-conversation
+  .JObwrW_panel
+  html[dir="rtl"] .JObwrW_panel { right: auto; left: 0 }
+  notes: move right -> left, reset right
+
+bundle:dsh-client-ui-conversation
+  .JObwrW_figures
+  html[dir="rtl"] .JObwrW_figures { margin-left: 0 !important; margin-right: auto !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-conversation
+  .JObwrW_swatch
+  html[dir="rtl"] .JObwrW_swatch { margin-right: 0 !important; margin-left: 6px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-conversation
+  .Sh0Q9G_trigger
+  html[dir="rtl"] .Sh0Q9G_trigger { padding-right: 8px !important; padding-left: 4px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-conversation
+  .uV2eYG_scroll
+  html[dir="rtl"] .uV2eYG_scroll { margin-right: 0 !important; margin-left: 4px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-conversation
+  .uV2eYG_input
+  html[dir="rtl"] .uV2eYG_input { padding-right: 14px !important; padding-left: 8px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-conversation
+  .uV2eYG_placeholder
+  html[dir="rtl"] .uV2eYG_placeholder { right: 14px; left: 8px }
+  notes: swap left <-> right
+
+bundle:dsh-client-ui-conversation
+  .uV2eYG_trailing
+  html[dir="rtl"] .uV2eYG_trailing { margin-left: 0 !important; margin-right: auto !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-conversation
+  .uV2eYG_retry
+  html[dir="rtl"] .uV2eYG_retry { margin-left: 0 !important; margin-right: 8px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-conversation
+  .lXshSW_header
+  html[dir="rtl"] .lXshSW_header { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-cordis
+  .cvtE3a_icon
+  html[dir="rtl"] .cvtE3a_icon { margin-right: 0 !important; margin-left: 8px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-cordis
+  .cvtE3a_status
+  html[dir="rtl"] .cvtE3a_status { margin-left: 0 !important; margin-right: 8px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-cordis
+  .cvtE3a_inspect
+  html[dir="rtl"] .cvtE3a_inspect { margin-left: 0 !important; margin-right: 4px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-cordis
+  .gNWCoW_purpose
+  html[dir="rtl"] .gNWCoW_purpose { margin-left: 0 !important; margin-right: 8px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-cordis
+  .gNWCoW_requestError
+  html[dir="rtl"] .gNWCoW_requestError { margin-left: 0 !important; margin-right: 8px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-cordis
+  .gNWCoW_readout
+  html[dir="rtl"] .gNWCoW_readout { margin-left: 0 !important; margin-right: 8px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-cordis
+  .gNWCoW_panelHint
+  html[dir="rtl"] .gNWCoW_panelHint { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-cordis
+  .gNWCoW_approvalPrompt
+  html[dir="rtl"] .gNWCoW_approvalPrompt { margin-left: 0 !important; margin-right: 8px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-cordis
+  .gNWCoW_notice
+  html[dir="rtl"] .gNWCoW_notice { margin-left: 0 !important; margin-right: 8px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-cordis
+  .gNWCoW_sourceCard
+  html[dir="rtl"] .gNWCoW_sourceCard { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-cordis
+  .gNWCoW_codeSection
+  html[dir="rtl"] .gNWCoW_codeSection { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-cordis
+  .gNWCoW_inspectButton
+  html[dir="rtl"] .gNWCoW_inspectButton { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-cordis
+  .Nqubda_badge
+  html[dir="rtl"] .Nqubda_badge { padding-right: 8px !important; padding-left: 10px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-cordis
+  .Nqubda_badgeCount
+  html[dir="rtl"] .Nqubda_badgeCount { margin-left: 0 !important; margin-right: auto !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-cordis
+  .Nqubda_transitionActions
+  html[dir="rtl"] .Nqubda_transitionActions { margin-left: 0 !important; margin-right: auto !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-cordis
+  .Nqubda_doubleCheck svg:first-child
+  html[dir="rtl"] .Nqubda_doubleCheck svg:first-child { left: auto; right: 0 }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-cordis
+  .Nqubda_doubleCheck svg:last-child
+  html[dir="rtl"] .Nqubda_doubleCheck svg:last-child { left: auto; right: 5px }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-deliverables
+  ._93YTAG_summary
+  html[dir="rtl"] ._93YTAG_summary { margin-left: 0 !important; margin-right: 8px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-deliverables
+  .nyYjTG_chevron
+  html[dir="rtl"] .nyYjTG_chevron { border-left-width: 0 !important; border-left-style: none !important; border-left-color: currentColor !important; border-right-width: .5px !important; border-right-style: solid !important; border-right-color: var(--dsw-alias-border-l3) !important }
+  notes: move border-left-width -> border-right-width, reset border-left-width; move border-left-style -> border-right-style, reset border-left-style; move border-left-color -> border-right-color, reset border-left-color
+
+bundle:dsh-client-ui-directory-picker-browse
+  .ZuhsRW_header
+  html[dir="rtl"] .ZuhsRW_header { padding-right: 24px !important; padding-left: 14px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-directory-picker-browse
+  .ZuhsRW_crumbBar
+  html[dir="rtl"] .ZuhsRW_crumbBar { margin-left: 0 !important; margin-right: -9px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-directory-picker-browse
+  .ZuhsRW_content
+  html[dir="rtl"] .ZuhsRW_content { padding-right: 24px !important; padding-left: 16px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-directory-picker-browse
+  .ZuhsRW_column
+  html[dir="rtl"] .ZuhsRW_column { padding-right: 0 !important; padding-left: 8px !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+bundle:dsh-client-ui-directory-picker-browse
+  .ZuhsRW_row
+  html[dir="rtl"] .ZuhsRW_row { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-directory-picker-browse
+  .ZuhsRW_status,.ZuhsRW_error
+  html[dir="rtl"] .ZuhsRW_status, html[dir="rtl"] .ZuhsRW_error { padding-right: 4px !important; padding-left: 120px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-directory-picker-browse
+  .ZuhsRW_loadingFloat
+  html[dir="rtl"] .ZuhsRW_loadingFloat { right: auto; left: 16px }
+  notes: move right -> left, reset right
+
+bundle:dsh-client-ui-goal
+  .nLMEza_bar
+  html[dir="rtl"] .nLMEza_bar { padding-right: 12px !important; padding-left: 5px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-input-trigger
+  ._3e4SsG_item
+  html[dir="rtl"] ._3e4SsG_item { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-input-trigger
+  ._3e4SsG_trailing
+  html[dir="rtl"] ._3e4SsG_trailing { margin-left: 0 !important; margin-right: auto !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-jobs
+  .QsffPG_menu
+  html[dir="rtl"] .QsffPG_menu { left: auto; right: 0 }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-layout
+  .pI_x6G_sidebarCol
+  html[dir="rtl"] .pI_x6G_sidebarCol { border-right-width: 0 !important; border-right-style: none !important; border-right-color: currentColor !important; border-left-width: .5px !important; border-left-style: solid !important; border-left-color: var(--dsw-alias-border-l3) !important }
+  notes: move border-right-width -> border-left-width, reset border-right-width; move border-right-style -> border-left-style, reset border-right-style; move border-right-color -> border-left-color, reset border-right-color
+
+bundle:dsh-client-ui-layout
+  .pI_x6G_handle
+  html[dir="rtl"] .pI_x6G_handle { transition: right var(--ds-transition-duration-slow) var(--ds-ease-in-out) !important; margin-left: 0 !important; margin-right: -4px !important }
+  notes: move margin-left -> margin-right, reset margin-left; value transition: left var(--ds-transition-duration-slow) var(--ds-ease-in-out) -> right var(--ds-transition-duration-slow) var(--ds-ease-in-out)
+
+bundle:dsh-client-ui-message-feedback
+  ._8_XoUG_failure
+  html[dir="rtl"] ._8_XoUG_failure { padding-left: 0 !important; padding-right: 4px !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-model-selection
+  ._7KE1Ra_trigger
+  html[dir="rtl"] ._7KE1Ra_trigger { padding-right: 8px !important; padding-left: 4px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-model-selection
+  ._7KE1Ra_option
+  html[dir="rtl"] ._7KE1Ra_option { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-model-selection
+  ._7KE1Ra_cell
+  html[dir="rtl"] ._7KE1Ra_cell { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-model-selection
+  ._7KE1Ra_cellValue
+  html[dir="rtl"] ._7KE1Ra_cellValue { text-align: left !important }
+  notes: value text-align: right -> left
+
+bundle:dsh-client-ui-open-in-app
+  .CAgGvG_main
+  html[dir="rtl"] .CAgGvG_main { padding-right: 7px !important; padding-left: 6px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-open-in-app
+  .CAgGvG_chevron
+  html[dir="rtl"] .CAgGvG_chevron { border-left-width: 0 !important; border-left-style: none !important; border-left-color: currentColor !important; padding-right: 4px !important; padding-left: 6px !important; border-right-width: .5px !important; border-right-style: solid !important; border-right-color: var(--dsw-alias-border-l4) !important }
+  notes: swap padding-left <-> padding-right; move border-left-width -> border-right-width, reset border-left-width; move border-left-style -> border-right-style, reset border-left-style; move border-left-color -> border-right-color, reset border-left-color
+
+bundle:dsh-client-ui-permission-presets
+  .oY77xG_rowText
+  html[dir="rtl"] .oY77xG_rowText { padding-right: 0 !important; padding-left: 48px !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+bundle:dsh-client-ui-schedule
+  .-\\34 LnlG_count
+  html[dir="rtl"] .-\\34 LnlG_count { margin-left: 0 !important; margin-right: 2px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-settings-general
+  .VOzbGW_trigger
+  html[dir="rtl"] .VOzbGW_trigger { padding-right: 8px !important; padding-left: 10px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-settings-general
+  .VOzbGW_navCell
+  html[dir="rtl"] .VOzbGW_navCell { text-align: right !important; padding-right: 12px !important; padding-left: 16px !important }
+  notes: swap padding-left <-> padding-right; value text-align: left -> right
+
+bundle:dsh-client-ui-settings-general
+  .VOzbGW_header
+  html[dir="rtl"] .VOzbGW_header { padding-right: 10px !important; padding-left: 14px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-settings-general
+  .VOzbGW_actions
+  html[dir="rtl"] .VOzbGW_actions { margin-left: 0 !important; margin-right: auto !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-settings-models
+  .zGbnIq_rowActions
+  html[dir="rtl"] .zGbnIq_rowActions { margin-left: 0 !important; margin-right: auto !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-settings-models
+  .zGbnIq_customizedSummary
+  html[dir="rtl"] .zGbnIq_customizedSummary { margin-left: 0 !important; margin-right: -4px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-settings-plugin-inventory
+  .qSYn7G_search>svg
+  html[dir="rtl"] .qSYn7G_search>svg { left: auto; right: 12px }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-settings-plugin-inventory
+  .qSYn7G_search input
+  html[dir="rtl"] .qSYn7G_search input { padding-right: 36px !important; padding-left: 34px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-settings-plugin-inventory
+  .qSYn7G_cardContent
+  html[dir="rtl"] .qSYn7G_cardContent { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-settings-plugin-inventory
+  .qSYn7G_headerEnd
+  html[dir="rtl"] .qSYn7G_headerEnd { margin-left: 0 !important; margin-right: auto !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-settings-plugin-inventory
+  .qSYn7G_groupToggle
+  html[dir="rtl"] .qSYn7G_groupToggle { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-settings-plugin-inventory
+  .qSYn7G_groupSub
+  html[dir="rtl"] .qSYn7G_groupSub { margin-right: 20px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-settings-plugins
+  .YyYd_a_header
+  html[dir="rtl"] .YyYd_a_header { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-sidebar-documentpreview
+  .dhJKeW_header
+  html[dir="rtl"] .dhJKeW_header { padding-right: 16px !important; padding-left: 6px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-sidebar-documentpreview
+  .dhJKeW_path
+  html[dir="rtl"] .dhJKeW_path { margin-right: 0 !important; margin-left: 12px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-sidebar-documentpreview
+  .dhJKeW_pathText
+  html[dir="rtl"] .dhJKeW_pathText { margin-right: 0 !important; margin-left: auto !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-sidebar-documentpreview
+  .dhJKeW_retry
+  html[dir="rtl"] .dhJKeW_retry { padding-right: 12px !important; padding-left: 14px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-sidebar-files
+  .k-1LKG_header
+  html[dir="rtl"] .k-1LKG_header { padding-right: 16px !important; padding-left: 6px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-sidebar-files
+  .k-1LKG_path
+  html[dir="rtl"] .k-1LKG_path { margin-right: 0 !important; margin-left: 12px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-sidebar-files
+  .k-1LKG_pathText
+  html[dir="rtl"] .k-1LKG_pathText { margin-right: 0 !important; margin-left: auto !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-sidebar-files
+  .k-1LKG_body
+  html[dir="rtl"] .k-1LKG_body { margin-right: 0 !important; padding-right: 8px !important; padding-left: 0 !important; margin-left: 2px !important }
+  notes: move margin-right -> margin-left, reset margin-right; swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-sidebar-files
+  .k-1LKG_level .k-1LKG_level
+  html[dir="rtl"] .k-1LKG_level .k-1LKG_level { padding-left: 0 !important; padding-right: 18px !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-sidebar-files
+  .k-1LKG_row
+  html[dir="rtl"] .k-1LKG_row { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-sidebar-right
+  .geFEbW_entry
+  html[dir="rtl"] .geFEbW_entry { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-sidebar-right
+  .P3OORG_panel
+  html[dir="rtl"] .P3OORG_panel { border-left-width: 0 !important; border-left-style: none !important; border-left-color: currentColor !important; right: auto; left: 0; border-right-width: .5px !important; border-right-style: solid !important; border-right-color: var(--dsw-alias-border-l4) !important }
+  notes: move right -> left, reset right; move border-left-width -> border-right-width, reset border-left-width; move border-left-style -> border-right-style, reset border-left-style; move border-left-color -> border-right-color, reset border-left-color
+
+bundle:dsh-client-ui-sidebar
+  .hHd-Xa_logoRow
+  html[dir="rtl"] .hHd-Xa_logoRow { padding-right: 4px !important; padding-left: 0 !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-sidebar
+  .hHd-Xa_panelRow
+  html[dir="rtl"] .hHd-Xa_panelRow { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-sidebar
+  .hHd-Xa_regionArea
+  html[dir="rtl"] .hHd-Xa_regionArea { margin-left: calc(-1 * var(--dsh-sidebar-inline-padding)) !important; margin-right: -4px !important; padding-left: 0 !important; padding-right: 4px !important }
+  notes: swap margin-left <-> margin-right; move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-sidebar
+  .hHd-Xa_collapsed .hHd-Xa_regionArea
+  html[dir="rtl"] .hHd-Xa_collapsed .hHd-Xa_regionArea { padding-right: 0 !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-skill
+  0%
+  0% { left: auto; right: -300px }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-skill
+  90%,to
+  90%,to { left: auto; right: 100% }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-skill
+  .iWrAna_leading
+  html[dir="rtl"] .iWrAna_leading { margin-right: 0 !important; margin-left: 6px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-skill
+  .iWrAna_instructionsCard
+  html[dir="rtl"] .iWrAna_instructionsCard { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-skill
+  .iWrAna_inspectButton
+  html[dir="rtl"] .iWrAna_inspectButton { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-subagent
+  .ZKlsPq_switcherRoot
+  html[dir="rtl"] .ZKlsPq_switcherRoot { margin-left: 0 !important; margin-right: 6px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-subagent
+  .ZKlsPq_menu>.ZKlsPq_node
+  html[dir="rtl"] .ZKlsPq_menu>.ZKlsPq_node { margin-left: 0 !important; margin-right: -3px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-subagent
+  .ZKlsPq_row
+  html[dir="rtl"] .ZKlsPq_row { text-align: right !important; padding-right: 11px !important; padding-left: 8px !important }
+  notes: swap padding-left <-> padding-right; value text-align: left -> right
+
+bundle:dsh-client-ui-subagent
+  .ZKlsPq_metrics
+  html[dir="rtl"] .ZKlsPq_metrics { text-align: left !important }
+  notes: value text-align: right -> left
+
+bundle:dsh-client-ui-subagent
+  .ZKlsPq_children
+  html[dir="rtl"] .ZKlsPq_children { margin-left: 0 !important; padding-left: 0 !important; margin-right: 18px !important; padding-right: 4px !important }
+  notes: move margin-left -> margin-right, reset margin-left; move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-subagent
+  .ZKlsPq_children>.ZKlsPq_node:before
+  html[dir="rtl"] .ZKlsPq_children>.ZKlsPq_node:before { left: auto; right: -4px }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-theme
+  .bVCLcG_rowText
+  html[dir="rtl"] .bVCLcG_rowText { padding-right: 0 !important; padding-left: 48px !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+bundle:dsh-client-ui-theme
+  .bVCLcG_arrows
+  html[dir="rtl"] .bVCLcG_arrows { right: auto; left: 8px }
+  notes: move right -> left, reset right
+
+bundle:dsh-client-ui-tool
+  .fsXYAq_card
+  html[dir="rtl"] .fsXYAq_card { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-tool
+  .fsXYAq_questionList
+  html[dir="rtl"] .fsXYAq_questionList { padding-left: 0 !important; padding-right: 20px !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-tool
+  0%
+  0% { left: auto; right: -300px }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-tool
+  90%,to
+  90%,to { left: auto; right: 100% }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-tool
+  .o3BgMG_summarySuffix
+  html[dir="rtl"] .o3BgMG_summarySuffix { margin-left: 0 !important; margin-right: 4px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-tool
+  .o3BgMG_diffStat
+  html[dir="rtl"] .o3BgMG_diffStat { margin-left: 0 !important; margin-right: 10px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-tool
+  .o3BgMG_fileLink
+  html[dir="rtl"] .o3BgMG_fileLink { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-tool
+  .o3BgMG_inspectButton
+  html[dir="rtl"] .o3BgMG_inspectButton { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-tool
+  .o3BgMG_ioCard
+  html[dir="rtl"] .o3BgMG_ioCard { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-tool
+  .o3BgMG_codeBody,.o3BgMG_terminalBody,.o3BgMG_diffBody,.o3BgMG_readBody,.o3BgMG_imageBody,.o3BgMG_searchBody,.o3BgMG_webBody
+  html[dir="rtl"] .o3BgMG_codeBody, html[dir="rtl"] .o3BgMG_terminalBody, html[dir="rtl"] .o3BgMG_diffBody, html[dir="rtl"] .o3BgMG_readBody, html[dir="rtl"] .o3BgMG_imageBody, html[dir="rtl"] .o3BgMG_searchBody, html[dir="rtl"] .o3BgMG_webBody { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-tool
+  .o3BgMG_searchRecovery
+  html[dir="rtl"] .o3BgMG_searchRecovery { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-tool
+  .ztWv_q_subCalls
+  html[dir="rtl"] .ztWv_q_subCalls { border-left-width: 0 !important; border-left-style: none !important; border-left-color: currentColor !important; margin-right: 22px !important; margin-left: 0 !important; padding-left: 0 !important; padding-right: 8px !important; border-right-width: .5px !important; border-right-style: solid !important; border-right-color: var(--dsw-alias-border-l2) !important }
+  notes: swap margin-left <-> margin-right; move padding-left -> padding-right, reset padding-left; move border-left-width -> border-right-width, reset border-left-width; move border-left-style -> border-right-style, reset border-left-style; move border-left-color -> border-right-color, reset border-left-color
+
+bundle:dsh-client-ui-tool
+  .CY-8Ka_terminal
+  html[dir="rtl"] .CY-8Ka_terminal { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-tool
+  .CY-8Ka_ioCard
+  html[dir="rtl"] .CY-8Ka_ioCard { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-tool
+  0%
+  0% { left: auto; right: -300px }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-tool
+  90%,to
+  90%,to { left: auto; right: 100% }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-tool
+  .CY-8Ka_leading
+  html[dir="rtl"] .CY-8Ka_leading { margin-right: 0 !important; margin-left: 6px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-tool
+  .CY-8Ka_inspectButton
+  html[dir="rtl"] .CY-8Ka_inspectButton { margin-right: 4px !important; margin-left: 0 !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_table th
+  html[dir="rtl"] .Y0dWHa_table th { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_eventHeader
+  html[dir="rtl"] .Y0dWHa_eventHeader { text-align: left !important; padding-right: 0 !important; padding-left: 4px !important }
+  notes: move padding-right -> padding-left, reset padding-right; value text-align: right -> left
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_requestBoundaryControl
+  html[dir="rtl"] .Y0dWHa_requestBoundaryControl { left: auto; right: calc(var(--request-boundary-base-left) + var(--request-boundary-offset,0px)) }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_requestBoundaryControl:after
+  html[dir="rtl"] .Y0dWHa_requestBoundaryControl:after { left: auto; right: 17px }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_turnRail,.Y0dWHa_selectionRail
+  html[dir="rtl"] .Y0dWHa_turnRail, html[dir="rtl"] .Y0dWHa_selectionRail { left: auto; right: 0 }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_event
+  html[dir="rtl"] .Y0dWHa_event { padding-left: 4px !important; padding-right: 36px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_turnLabel
+  html[dir="rtl"] .Y0dWHa_turnLabel { border-bottom-right-radius: 0 !important; border-bottom-left-radius: 2px !important; left: auto; right: 0 }
+  notes: move left -> right, reset left; swap border-bottom-left-radius <-> border-bottom-right-radius
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_content
+  html[dir="rtl"] .Y0dWHa_content { padding-left: 0 !important; padding-right: 4px !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_event
+  html[dir="rtl"] .Y0dWHa_event { padding-left: 3px !important; padding-right: 28px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_requestBoundaryControl
+  html[dir="rtl"] .Y0dWHa_requestBoundaryControl { transition-property: right !important }
+  notes: value transition-property: left -> right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_collapsedTurnEllipsis
+  html[dir="rtl"] .Y0dWHa_collapsedTurnEllipsis { margin-right: 0 !important; margin-left: 6px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_toolCallPayload
+  html[dir="rtl"] .Y0dWHa_toolCallPayload { margin-left: 0 !important; margin-right: 7px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_table tbody tr[data-kind=subtool] .Y0dWHa_content
+  html[dir="rtl"] .Y0dWHa_table tbody tr[data-kind=subtool] .Y0dWHa_content { padding-left: 0 !important; padding-right: 26px !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_arrow
+  html[dir="rtl"] .Y0dWHa_arrow { margin-right: 0 !important; margin-left: 8px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_details
+  html[dir="rtl"] .Y0dWHa_details { border-left-width: 0 !important; border-left-style: none !important; border-left-color: currentColor !important; border-right-width: .5px !important; border-right-style: solid !important; border-right-color: var(--dsw-alias-border-l2) !important }
+  notes: move border-left-width -> border-right-width, reset border-left-width; move border-left-style -> border-right-style, reset border-left-style; move border-left-color -> border-right-color, reset border-left-color
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_detailsResizeHandle
+  html[dir="rtl"] .Y0dWHa_detailsResizeHandle { left: auto; right: -4px }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_detailsHeader
+  html[dir="rtl"] .Y0dWHa_detailsHeader { padding-right: 12px !important; padding-left: 8px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_compactedSummary .Y0dWHa_markdownPayload
+  html[dir="rtl"] .Y0dWHa_compactedSummary .Y0dWHa_markdownPayload { padding-right: 0 !important; padding-left: 18px !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_overview>.Y0dWHa_requestTokenDetail dt
+  html[dir="rtl"] .Y0dWHa_overview>.Y0dWHa_requestTokenDetail dt { padding-left: 0 !important; padding-right: 12px !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_overviewHeading
+  html[dir="rtl"] .Y0dWHa_overviewHeading { padding-right: 14px !important; padding-left: 0 !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_thinkingQuote
+  html[dir="rtl"] .Y0dWHa_thinkingQuote { border-left-width: 0 !important; border-left-style: none !important; border-left-color: currentColor !important; margin-right: 12px !important; margin-left: 14px !important; padding-left: 0 !important; padding-right: 6px !important; border-right-width: 2px !important; border-right-style: solid !important; border-right-color: var(--dsw-alias-markdown-citation) !important }
+  notes: swap margin-left <-> margin-right; move padding-left -> padding-right, reset padding-left; move border-left-width -> border-right-width, reset border-left-width; move border-left-style -> border-right-style, reset border-left-style; move border-left-color -> border-right-color, reset border-left-color
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_schemaTree
+  html[dir="rtl"] .Y0dWHa_schemaTree { margin-right: 0 !important; margin-left: 6px !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_assistantToolCallButton
+  html[dir="rtl"] .Y0dWHa_assistantToolCallButton { margin-left: 0 !important; margin-right: -4px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_assistantToolCallIcon
+  html[dir="rtl"] .Y0dWHa_assistantToolCallIcon { margin-right: 0 !important; margin-left: 5px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_assistantToolCallName
+  html[dir="rtl"] .Y0dWHa_assistantToolCallName { margin-right: 0 !important; margin-left: 5px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_toolCatalogDefinition
+  html[dir="rtl"] .Y0dWHa_toolCatalogDefinition { padding-right: 29px !important; padding-left: 0 !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_toolCatalogFullDescription
+  html[dir="rtl"] .Y0dWHa_toolCatalogFullDescription { padding-right: 0 !important; padding-left: 14px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_toolCatalogTree
+  html[dir="rtl"] .Y0dWHa_toolCatalogTree { margin-left: 6px !important; margin-right: -14px !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-trajectory
+  .Y0dWHa_details
+  html[dir="rtl"] .Y0dWHa_details { border-left-color: currentColor !important; right: auto; left: 0; border-right-color: var(--dsw-alias-border-l3) !important }
+  notes: move right -> left, reset right; move border-left-color -> border-right-color, reset border-left-color
+
+bundle:dsh-client-ui-trajectory
+  .fV0t5q_controlThumb
+  html[dir="rtl"] .fV0t5q_controlThumb { left: auto; right: 2px }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-trajectory
+  .fV0t5q_search
+  html[dir="rtl"] .fV0t5q_search { margin-left: 0 !important; margin-right: auto !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-trajectory
+  ._1p9O6q_labels
+  html[dir="rtl"] ._1p9O6q_labels { border-right-width: 0 !important; border-right-style: none !important; border-right-color: currentColor !important; border-left-width: .5px !important; border-left-style: solid !important; border-left-color: var(--dsw-alias-border-l1) !important }
+  notes: move border-right-width -> border-left-width, reset border-right-width; move border-right-style -> border-left-style, reset border-right-style; move border-right-color -> border-left-color, reset border-right-color
+
+bundle:dsh-client-ui-trajectory
+  ._1p9O6q_labels span
+  html[dir="rtl"] ._1p9O6q_labels span { text-align: left !important; right: auto; left: 3px }
+  notes: move right -> left, reset right; value text-align: right -> left
+
+bundle:dsh-client-ui-trajectory
+  ._1p9O6q_earlierHistory
+  html[dir="rtl"] ._1p9O6q_earlierHistory { padding-left: 0 !important; left: auto; right: 0; padding-right: 3px !important }
+  notes: move left -> right, reset left; move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-trajectory
+  ._1p9O6q_empty
+  html[dir="rtl"] ._1p9O6q_empty { left: auto; right: 50% }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-trajectory
+  ._1p9O6q_lanes
+  html[dir="rtl"] ._1p9O6q_lanes { left: auto; right: var(--trajectory-domain-left) }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-trajectory
+  ._1p9O6q_turnBoundaries
+  html[dir="rtl"] ._1p9O6q_turnBoundaries { left: auto; right: var(--trajectory-domain-left) }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-trajectory
+  ._1p9O6q_lanes[data-animate-viewport=true],._1p9O6q_turnBoundaries[data-animate-viewport=true]
+  html[dir="rtl"] ._1p9O6q_lanes[data-animate-viewport=true], html[dir="rtl"] ._1p9O6q_turnBoundaries[data-animate-viewport=true] { transition: right .18s ease-out !important }
+  notes: value transition: left .18s ease-out -> right .18s ease-out
+
+bundle:dsh-client-ui-trajectory
+  ._1p9O6q_turnBoundary
+  html[dir="rtl"] ._1p9O6q_turnBoundary { left: auto; right: var(--trajectory-turn-left) }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-trajectory
+  ._1p9O6q_span
+  html[dir="rtl"] ._1p9O6q_span { left: auto; right: calc(var(--trajectory-span-left) + var(--trajectory-span-gap)) }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-trajectory
+  ._1p9O6q_selection
+  html[dir="rtl"] ._1p9O6q_selection { left: auto; right: var(--trajectory-selection-left) }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-trajectory
+  ._1p9O6q_selectionEdges
+  html[dir="rtl"] ._1p9O6q_selectionEdges { left: auto; right: var(--trajectory-selection-left) }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-trajectory
+  ._1p9O6q_hoverLine
+  html[dir="rtl"] ._1p9O6q_hoverLine { left: auto; right: clamp(0px, calc(var(--trajectory-hover-left) - 1px), calc(100% - 2px)) }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-trajectory
+  ._1p9O6q_selectionEdges:before
+  html[dir="rtl"] ._1p9O6q_selectionEdges:before { left: auto; right: 0 }
+  notes: move left -> right, reset left
+
+bundle:dsh-client-ui-trajectory
+  ._1p9O6q_selectionEdges:after
+  html[dir="rtl"] ._1p9O6q_selectionEdges:after { right: auto; left: 0 }
+  notes: move right -> left, reset right
+
+bundle:dsh-client-ui-user-questions
+  .Mbwy4a_header
+  html[dir="rtl"] .Mbwy4a_header { padding-right: 24px !important; padding-left: 16px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-user-questions
+  .Mbwy4a_option
+  html[dir="rtl"] .Mbwy4a_option { text-align: right !important; padding-right: 8px !important; padding-left: 12px !important }
+  notes: swap padding-left <-> padding-right; value text-align: left -> right
+
+bundle:dsh-client-ui-user-questions
+  .Mbwy4a_customRow
+  html[dir="rtl"] .Mbwy4a_customRow { padding-right: 8px !important; padding-left: 12px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-user-questions
+  .Mbwy4a_footer
+  html[dir="rtl"] .Mbwy4a_footer { padding-right: 18px !important; padding-left: 10px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-user-questions
+  .Mbwy4a_feedback
+  html[dir="rtl"] .Mbwy4a_feedback { text-align: left !important }
+  notes: value text-align: right -> left
+
+bundle:dsh-client-ui-user-questions
+  .Mbwy4a_header
+  html[dir="rtl"] .Mbwy4a_header { padding-right: 18px !important; padding-left: 12px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-workflow-run
+  .DBuyfa_runLeading
+  html[dir="rtl"] .DBuyfa_runLeading { margin-left: 0 !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-workflow-run
+  .DBuyfa_phaseLeading
+  html[dir="rtl"] .DBuyfa_phaseLeading { margin-left: 0 !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-workflow-run
+  .DBuyfa_phaseStatus
+  html[dir="rtl"] .DBuyfa_phaseStatus { text-align: left !important }
+  notes: value text-align: right -> left
+
+bundle:dsh-client-ui-workflow-run
+  .DBuyfa_phaseList
+  html[dir="rtl"] .DBuyfa_phaseList { padding-right: 16px !important; padding-left: 0 !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-workflow-run
+  .DBuyfa_members
+  html[dir="rtl"] .DBuyfa_members { padding-right: 16px !important; padding-left: 0 !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-workflow-run
+  .DBuyfa_memberRow,.DBuyfa_memberButton
+  html[dir="rtl"] .DBuyfa_memberRow, html[dir="rtl"] .DBuyfa_memberButton { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-workflow-run
+  .DBuyfa_memberStatus
+  html[dir="rtl"] .DBuyfa_memberStatus { text-align: left !important }
+  notes: value text-align: right -> left
+
+bundle:dsh-client-ui-workflow-run
+  .DBuyfa_phaseList,.DBuyfa_members
+  html[dir="rtl"] .DBuyfa_phaseList, html[dir="rtl"] .DBuyfa_members { padding-left: 0 !important; padding-right: 12px !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-workspace
+  .YDXeBa_searchResultRow
+  html[dir="rtl"] .YDXeBa_searchResultRow { text-align: right !important }
+  notes: value text-align: left -> right
+
+bundle:dsh-client-ui-workspace
+  .YDXeBa_searchResultTitle
+  html[dir="rtl"] .YDXeBa_searchResultTitle { margin-left: 0 !important; margin-right: 4px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-workspace
+  .YDXeBa_searchResultMeta
+  html[dir="rtl"] .YDXeBa_searchResultMeta { margin-left: 0 !important; margin-right: 20px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-workspace
+  .YDXeBa_sessionRow .YDXeBa_title
+  html[dir="rtl"] .YDXeBa_sessionRow .YDXeBa_title { margin-right: 4px !important; margin-left: 6px !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-workspace
+  .YDXeBa_flatSessionRowWithoutStatus .YDXeBa_title
+  html[dir="rtl"] .YDXeBa_flatSessionRowWithoutStatus .YDXeBa_title { margin-right: 0 !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-workspace
+  .YDXeBa_scheduleIndicator
+  html[dir="rtl"] .YDXeBa_scheduleIndicator { margin-right: 0 !important; margin-left: 6px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-workspace
+  .YDXeBa_searchScheduleIndicator
+  html[dir="rtl"] .YDXeBa_searchScheduleIndicator { margin-left: 0 !important; margin-right: 4px !important }
+  notes: swap margin-left <-> margin-right
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_root
+  html[dir="rtl"] .bhn1Oq_root { padding-right: 0 !important; padding-left: var(--dsh-session-list-edge-inset) !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_root.bhn1Oq_rail
+  html[dir="rtl"] .bhn1Oq_root.bhn1Oq_rail { padding-left: 0 !important }
+  notes: move padding-right -> padding-left, reset padding-right
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_sectionHeader
+  html[dir="rtl"] .bhn1Oq_sectionHeader { padding-left: 0 !important; padding-right: 4px !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_root:not(.bhn1Oq_rail) .bhn1Oq_sectionHeader
+  html[dir="rtl"] .bhn1Oq_root:not(.bhn1Oq_rail) .bhn1Oq_sectionHeader { margin-right: 0 !important; margin-left: -4px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_sectionLabelHidden
+  html[dir="rtl"] .bhn1Oq_sectionLabelHidden { margin-right: 0 !important; margin-left: -4px !important }
+  notes: move margin-right -> margin-left, reset margin-right
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_searchSlot
+  html[dir="rtl"] .bhn1Oq_searchSlot { margin-left: 0 !important; margin-right: auto !important; padding-right: 0 !important }
+  notes: move margin-left -> margin-right, reset margin-left; move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_searchSlotExpanded
+  html[dir="rtl"] .bhn1Oq_searchSlotExpanded { padding-right: 0 !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_searchExpanded
+  html[dir="rtl"] .bhn1Oq_searchExpanded { padding-right: 0 !important; padding-left: 4px !important }
+  notes: swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_searchExpanded .bhn1Oq_searchInput
+  html[dir="rtl"] .bhn1Oq_searchExpanded .bhn1Oq_searchInput { margin-left: 0 !important; margin-right: -2px !important }
+  notes: move margin-left -> margin-right, reset margin-left
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_rail .bhn1Oq_sectionHeader
+  html[dir="rtl"] .bhn1Oq_rail .bhn1Oq_sectionHeader { padding-right: 0 !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_listArea
+  html[dir="rtl"] .bhn1Oq_listArea { margin-left: calc(-1 * var(--dsh-session-list-edge-inset)) !important; margin-right: -4px !important; padding-left: 0 !important; padding-right: 4px !important }
+  notes: swap margin-left <-> margin-right; move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_rail .bhn1Oq_listArea
+  html[dir="rtl"] .bhn1Oq_rail .bhn1Oq_listArea { padding-right: 0 !important }
+  notes: move padding-left -> padding-right, reset padding-left
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_fade
+  html[dir="rtl"] .bhn1Oq_fade { left: var(--dsh-session-list-edge-inset); right: 0 }
+  notes: swap left <-> right
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_list
+  html[dir="rtl"] .bhn1Oq_list { margin-left: var(--dsh-session-list-scrollbar-offset) !important; margin-right: -4px !important; padding-left: calc(var(--dsh-session-list-edge-inset) - var(--dsh-session-list-scrollbar-width) - var(--dsh-session-list-scrollbar-offset)) !important; padding-right: 4px !important }
+  notes: swap margin-left <-> margin-right; swap padding-left <-> padding-right
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_listTopDropIndicator
+  html[dir="rtl"] .bhn1Oq_listTopDropIndicator { left: var(--dsh-session-list-edge-inset); right: 0 }
+  notes: swap left <-> right
+
+bundle:dsh-client-ui-workspace
+  .bhn1Oq_sessionOverflowButton
+  html[dir="rtl"] .bhn1Oq_sessionOverflowButton { text-align: right !important; padding-right: 28px !important; padding-left: 12px !important }
+  notes: swap padding-left <-> padding-right; value text-align: left -> right
+
+
+SKIPPED
+=======
+
+frontend:index-DPX2bQLO.css :: ._toast_e5v0f_6 :: portal positioned from js (inline left); mirroring over-constrains it
+bundle:dsh-screen-share :: - :: package ships no inlined css
+bundle:dsh-cron :: - :: package ships no inlined css
+bundle:dsh-telegram-duty :: - :: package ships no inlined css
+bundle:dsh-addons-manager :: - :: package ships no inlined css
+bundle:dsh-arabic :: - :: package ships no inlined css
+bundle:dsh-extension-hub :: - :: package ships no inlined css
+bundle:dsh-free-search :: - :: package ships no inlined css
+bundle:dsh-mcp-toggle :: - :: package ships no inlined css
+bundle:dsh-rtl :: - :: package ships no inlined css
+bundle:dsh-ui-github :: - :: package ships no inlined css
+bundle:dsh-api-gateway :: - :: package ships no inlined css
+bundle:dsh-api-remotes :: - :: package ships no inlined css
+bundle:dsh-api-session-controller :: - :: package ships no inlined css
+bundle:dsh-api-workspace-controller :: - :: package ships no inlined css
+bundle:dsh-api-workspace-files :: - :: package ships no inlined css
+bundle:dsh-client-connection :: - :: package ships no inlined css
+bundle:dsh-client-file-upload :: - :: package ships no inlined css
+bundle:dsh-client-hmr :: - :: package ships no inlined css
+bundle:dsh-client-modules :: - :: package ships no inlined css
+bundle:dsh-client-resources :: - :: package ships no inlined css
+bundle:dsh-client-ui-brand-official :: - :: package ships no inlined css
+bundle:dsh-client-ui-directory-picker-native :: - :: package ships no inlined css
+bundle:dsh-client-ui-reference :: - :: package ships no inlined css
+bundle:dsh-client-ui-renderer :: - :: package ships no inlined css
+bundle:dsh-client-ui-session :: - :: package ships no inlined css
+bundle:dsh-client-ui-settings :: - :: package ships no inlined css
+bundle:dsh-cordis-client-runner :: - :: package ships no inlined css
+bundle:dsh-typert-registry :: - :: package ships no inlined css

@@ -1,0 +1,1944 @@
+import * as fs from "node:fs";
+import * as path from "node:path";
+import z from "@deepseek-ai/schemastery";
+import * as https from "node:https";
+import { installModelSelection } from "@deepseek-ai/dsh-agent";
+import { createUserMessage } from "@deepseek-ai/dsh-llm";
+import { SessionId } from "@deepseek-ai/dsh-session";
+import { defineTool } from "@deepseek-ai/dsh-tools";
+import z$1 from "zod";
+//#region lib/types/config.js
+/**
+* Telegram duty gateway configuration. Explicit values in this schema
+* (settings / patch row config) always win; an optional `credentialsFile`
+* can supply token / chat_id / proxy defaults.
+* @module @luzhengyangtx/dsh-telegram-duty/config
+*/
+/** Settings document namespace owned by this plugin. */
+const TELEGRAM_DUTY_NAMESPACE = "telegram-duty";
+const DUTY_STATE_ON_NAMESPACE = "telegram-duty-on";
+const DUTY_STATE_OFF_NAMESPACE = "telegram-duty-off";
+/**
+* State-marker namespaces: the web settings wire is allowlisted, so the
+* browser half cannot READ this plugin's configuration namespace. Instead the
+* host writes a timestamp into the marker namespace matching the current watch
+* mode; the forwarded `settings/document-updated` event carries the namespace
+* name verbatim, and the banner derives the mode from WHICH marker moved.
+*/
+/** Trivial schema for the state-marker sections. */
+const StateMarkerConfig = z.object({ n: z.number().default(0) });
+const Config = z.object({
+	token: z.string().role("secret").default(""),
+	chatId: z.number().default(0),
+	proxy: z.string().default(""),
+	sessionId: z.string().default("telegram-duty"),
+	dutyCwd: z.string().default(""),
+	approvalTimeoutMinutes: z.number().default(10),
+	watchMode: z.union([z.const("local"), z.const("duty")]).default("local"),
+	language: z.union([z.const("zh"), z.const("en")]).default("en"),
+	dataDir: z.string().default(""),
+	credentialsFile: z.string().default(""),
+	replyChunkChars: z.number().default(3800)
+});
+/** Apply schema defaults (and surface schema errors early). */
+function resolveConfig(config = {}) {
+	return Config(config);
+}
+//#endregion
+//#region lib/types/telegram.js
+/**
+* Minimal Telegram Bot API client over node:https.
+*
+* Telegram requires a proxy on this machine (Clash at 127.0.0.1:7890). Node 24
+* supports HTTP CONNECT proxying natively through the https.Agent `proxy`
+* option, so no extra dependency or hand-rolled tunnel is needed.
+* @module @deepseek-ai/dsh-telegram-duty/telegram
+*/
+const debug = process.env.TELEGRAM_DUTY_DEBUG === "1";
+const debugLog = (...args) => {
+	if (debug) console.log("[telegram-duty]", ...args);
+};
+/** One plain GET returning status + body. */
+function request(url, agent, timeoutMs) {
+	debugLog("request:", url);
+	return new Promise((resolve, reject) => {
+		const req = https.request(url, {
+			agent,
+			method: "GET"
+		}, (res) => {
+			let body = "";
+			res.setEncoding("utf-8");
+			res.on("data", (chunk) => {
+				body += chunk;
+			});
+			res.on("end", () => {
+				resolve({
+					status: res.statusCode ?? 0,
+					body
+				});
+			});
+			res.on("error", reject);
+		});
+		req.setTimeout(timeoutMs, () => {
+			req.destroy(/* @__PURE__ */ new Error(`telegram request timed out after ${timeoutMs}ms`));
+		});
+		req.on("error", reject);
+		req.end();
+	});
+}
+/** Telegram Bot API client scoped to one bot token. */
+var TelegramClient = class {
+	token;
+	agent;
+	constructor(token, proxy) {
+		this.token = token;
+		this.agent = proxy === "" ? new https.Agent({ keepAlive: true }) : new https.Agent({
+			keepAlive: true,
+			proxyEnv: {
+				HTTPS_PROXY: proxy,
+				HTTP_PROXY: proxy
+			}
+		});
+	}
+	/** Invoke one Bot API method with query-string parameters. */
+	async call(method, params, timeoutMs) {
+		const qs = new URLSearchParams();
+		for (const [key, value] of Object.entries(params)) {
+			if (value === void 0 || value === null) continue;
+			qs.set(key, typeof value === "string" ? value : typeof value === "number" || typeof value === "boolean" ? String(value) : JSON.stringify(value));
+		}
+		const res = await request(`https://api.telegram.org/bot${this.token}/${method}?${qs.toString()}`, this.agent, timeoutMs);
+		return JSON.parse(res.body);
+	}
+	/** Long-poll for new messages and button presses. */
+	async getUpdates(offset, longPollSeconds) {
+		return this.call("getUpdates", {
+			offset,
+			timeout: longPollSeconds,
+			allowed_updates: ["message", "callback_query"]
+		}, (longPollSeconds + 15) * 1e3);
+	}
+	/** Send a text message to a chat, optionally with inline buttons. */
+	async sendMessage(chatId, text, options = {}) {
+		const params = {
+			chat_id: chatId,
+			text
+		};
+		if (options.replyToMessageId !== void 0) params.reply_to_message_id = options.replyToMessageId;
+		if (options.keyboard !== void 0 && options.keyboard.length > 0) params.reply_markup = { inline_keyboard: options.keyboard };
+		return this.call("sendMessage", params, 3e4);
+	}
+	/** Acknowledge a button press (keeps the button spinner from hanging). */
+	async answerCallbackQuery(queryId, text) {
+		const params = { callback_query_id: queryId };
+		if (text !== void 0 && text !== "") params.text = text;
+		return this.call("answerCallbackQuery", params, 1e4);
+	}
+	/**
+	* Tell Telegram the bot is doing something (e.g. 'typing'): the phone shows
+	* the "bot is typing…" animation for about 5 seconds, so callers re-send it
+	* every few seconds to keep the animation alive during long work.
+	*/
+	async sendChatAction(chatId, action) {
+		return this.call("sendChatAction", {
+			chat_id: chatId,
+			action
+		}, 1e4);
+	}
+	/** Identity check (used at startup to validate token + proxy). */
+	async getMe() {
+		return this.call("getMe", {}, 3e4);
+	}
+	/** Close all pooled sockets (plugin teardown). */
+	close() {
+		this.agent.destroy();
+	}
+};
+//#endregion
+//#region lib/types/storage.js
+/**
+* Small atomic-JSON persistence helpers shared by the poller (offset) and the
+* duty toggle (state). Writes go through a tmp file + rename so a crash never
+* leaves a torn document.
+* @module @deepseek-ai/dsh-telegram-duty/storage
+*/
+/** Read and parse a JSON file, falling back when missing or malformed. */
+function readJson(file, fallback) {
+	try {
+		return JSON.parse(fs.readFileSync(file, "utf-8"));
+	} catch {
+		return fallback;
+	}
+}
+/** Atomically write a JSON document (tmp + rename). */
+function writeJson(file, value) {
+	const dir = path.dirname(file);
+	fs.mkdirSync(dir, { recursive: true });
+	const tmp = `${file}.tmp`;
+	fs.writeFileSync(tmp, JSON.stringify(value, null, 2), "utf-8");
+	fs.renameSync(tmp, file);
+}
+//#endregion
+//#region lib/types/poller.js
+/**
+* Long-poll loop over Telegram getUpdates with offset persistence, per-update
+* sequential acking, and exponential backoff. Idle cost is one in-flight
+* request held server-side — no tokens, no busy work.
+* @module @deepseek-ai/dsh-telegram-duty/poller
+*/
+const sleep = (ms) => new Promise((resolve) => {
+	setTimeout(resolve, ms);
+});
+/** Durable getUpdates cursor: restarts resume without losing or re-sending. */
+var Poller = class {
+	options;
+	stopped = false;
+	busy = Promise.resolve();
+	nextOffset;
+	firstStart;
+	offsetFile;
+	constructor(options) {
+		this.options = options;
+		this.offsetFile = path.join(options.dataDir, "offset.json");
+		const record = readJson(this.offsetFile, { nextOffset: -1 });
+		this.nextOffset = record.nextOffset;
+		this.firstStart = record.nextOffset === -1;
+	}
+	/** Start the loop (idempotent). */
+	start() {
+		if (this.stopped) return;
+		this.busy = this.loop();
+	}
+	/** Ask the loop to wind down and await the in-flight cycle. */
+	async stop() {
+		this.stopped = true;
+		await this.busy;
+	}
+	async loop() {
+		const longPoll = this.options.longPollSeconds ?? 25;
+		const maxBackoff = this.options.maxBackoffMs ?? 6e4;
+		const minInterval = this.options.minIntervalMs ?? 0;
+		let backoffMs = Math.min(1e3, maxBackoff);
+		while (!this.stopped) try {
+			const res = await this.options.client.getUpdates(this.firstStart ? 0 : this.nextOffset, longPoll);
+			if (!res.ok) throw new Error(`getUpdates rejected: ${res.description ?? "unknown error"}`);
+			this.options.onChannelState?.(true);
+			backoffMs = Math.min(1e3, maxBackoff);
+			const updates = res.result ?? [];
+			if (this.firstStart) {
+				for (const update of updates) this.nextOffset = Math.max(this.nextOffset, update.update_id + 1);
+				this.firstStart = false;
+				writeJson(this.offsetFile, { nextOffset: this.nextOffset });
+				if (this.stopped) return;
+				if (minInterval > 0) await sleep(minInterval);
+				continue;
+			}
+			for (const update of updates) {
+				this.nextOffset = Math.max(this.nextOffset, update.update_id + 1);
+				try {
+					await this.options.onUpdate(update);
+				} catch (error) {
+					this.options.onError?.(error instanceof Error ? error : new Error(String(error)));
+				}
+				writeJson(this.offsetFile, { nextOffset: this.nextOffset });
+			}
+			if (this.stopped) return;
+			if (minInterval > 0) await sleep(minInterval);
+		} catch (error) {
+			this.options.onChannelState?.(false);
+			this.options.onError?.(error instanceof Error ? error : new Error(String(error)));
+			await sleep(backoffMs);
+			backoffMs = Math.min(backoffMs * 2, maxBackoff);
+		}
+	}
+};
+//#endregion
+//#region lib/types/duty.js
+/**
+* Duty-session driver: keeps one stable DSH session live, delivers Telegram
+* text as follow-up turns (which wakes its agent), waits for the turn to
+* settle, and returns the final assistant text. Targeted delivery runs the
+* same flow against any other session id (`runIn`), and `ensureLive` attaches
+* the duty session without a turn (the web sidebar button entry point). The
+* resume/create + summarize pattern follows @kriskwok/dsh-feishu-gateway (MIT).
+* @module @luzhengyangtx/dsh-telegram-duty/duty
+*/
+/**
+* Message source marking phone-injected user messages. The duty session's own
+* injections use `telegram-duty` (the host projection unit folds on it to
+* mark the duty session for the web sidebar button); deliveries into OTHER
+* sessions use the targeted name so they never mark those sessions.
+*/
+const DUTY_SOURCE_PLUGIN = "telegram-duty";
+const TARGETED_SOURCE_PLUGIN = "telegram-duty-targeted";
+/** Error marker for a targeted session that could not be resumed. */
+const TARGET_OFFLINE_ERROR = "OFFLINE";
+/**
+* Aggregate the final assistant text from session events since firstSeq:
+* the last tool-free assistant/message of the turn; a `turn/end` with a
+* non-completed reason becomes an error outcome, while an aborted turn is
+* marked `cancelled` (a deliberate interruption, not a failure).
+*/
+function summarize(events, firstSeq) {
+	let started = false;
+	let text = "";
+	let error;
+	let cancelled = false;
+	for (const event of events) {
+		if (event.seq < firstSeq) continue;
+		if (event.type === "turn/start") {
+			started = true;
+			continue;
+		}
+		if (!started) continue;
+		if (event.type === "assistant/message") {
+			const joined = event.data.message.content.filter((block) => block.type === "text").map((block) => block.text).join("");
+			if (joined !== "") text = joined;
+		}
+		if (event.type === "turn/end") {
+			const reason = event.data.reason;
+			if (reason.kind === "error") error = `${reason.error.code}: ${reason.error.message}`;
+			else if (reason.kind === "aborted") cancelled = true;
+			else if (reason.kind !== "completed") error = `turn ended with reason "${reason.kind}"`;
+		}
+	}
+	if (error !== void 0) return {
+		text,
+		error
+	};
+	return cancelled ? {
+		text,
+		cancelled: true
+	} : { text };
+}
+/** Serialized delivery into the duty session and, when targeted, others. */
+var SessionDriver = class {
+	ctx;
+	options;
+	chain = Promise.resolve();
+	presetPromise;
+	constructor(ctx, options) {
+		this.ctx = ctx;
+		this.options = options;
+	}
+	/**
+	* Resolve the default agent preset id once. Mounting it in setup is what
+	* gives the duty agent its tools — without it the model has no tool schemas
+	* and "fakes" tool calls as plain text (observed in e2e).
+	*/
+	resolvePreset() {
+		this.presetPromise ??= (async () => {
+			const presets = this.ctx.get("agentPresets");
+			if (presets === void 0) return void 0;
+			return (await presets.resolve(void 0)).id;
+		})();
+		return this.presetPromise;
+	}
+	/** Queue one Telegram text into the duty session; resolves with the reply. */
+	async run(text) {
+		return await this.runIn(this.options.dutySessionId, text);
+	}
+	/** Queue one Telegram text into an arbitrary session id. */
+	async runIn(sessionId, text) {
+		let outcome = { text: "" };
+		const next = this.chain.catch(() => void 0).then(async () => {
+			try {
+				outcome = await this.turn(sessionId, text);
+			} catch (error) {
+				outcome = {
+					text: "",
+					error: error instanceof Error ? error.message : String(error)
+				};
+			}
+		});
+		this.chain = next.catch(() => void 0);
+		await next;
+		return outcome;
+	}
+	/**
+	* Attach the duty session without running a turn (resume, or create when it
+	* never existed). The attached agent is deliberately NOT disposed: the
+	* caller (the web sidebar button) wants the session live.
+	*/
+	async ensureLive() {
+		let result = {};
+		const next = this.chain.catch(() => void 0).then(async () => {
+			try {
+				await this.attach(this.options.dutySessionId, true);
+			} catch (error) {
+				result = { error: error instanceof Error ? error.message : String(error) };
+			}
+		});
+		this.chain = next.catch(() => void 0);
+		await next;
+		return result;
+	}
+	/**
+	* Resolve one session as a live agent, reusing an already-live one. Setup
+	* mounts the default preset (tools) and model selection; the persona is
+	* duty-only. A targeted session that cannot be resumed reports OFFLINE
+	* instead of creating a fresh blank session (only the duty session is
+	* auto-created).
+	*/
+	async attach(sessionId, isDuty) {
+		const agents = this.ctx.agents;
+		const selection = this.ctx.agentDefaultModel.currentSelection();
+		const agentOptions = {
+			provider: selection.provider,
+			model: selection.model
+		};
+		const presetId = await this.resolvePreset();
+		const setup = async (agentCtx) => {
+			installModelSelection(agentCtx, {
+				current: selection,
+				assembled: void 0
+			});
+			if (isDuty) agentCtx.systemPrompt.section({
+				name: "deployment:persona",
+				order: 0,
+				text: this.options.persona
+			});
+			if (presetId !== void 0) {
+				const presets = this.ctx.get("agentPresets");
+				if (presets !== void 0) await presets.mount(agentCtx, presetId);
+			}
+		};
+		const live = agents.get(SessionId(sessionId));
+		if (live !== void 0) return {
+			agent: live,
+			dispose: () => Promise.resolve()
+		};
+		let handle;
+		try {
+			handle = await agents.resume({
+				resumeSessionId: SessionId(sessionId),
+				agentOptions,
+				setup
+			});
+		} catch (error) {
+			const resumeError = error instanceof Error ? error.message : String(error);
+			if (!isDuty) throw new Error(TARGET_OFFLINE_ERROR);
+			this.ctx.logger.warn("telegram-duty", `resume "${this.options.dutySessionId}" failed (${resumeError}), creating`);
+			try {
+				handle = await agents.create({
+					sessionId: SessionId(sessionId),
+					meta: {
+						cwd: this.options.cwd,
+						...presetId !== void 0 ? { agentPreset: presetId } : {}
+					},
+					agentOptions,
+					setup
+				});
+			} catch (createError) {
+				const createMessage = createError instanceof Error ? createError.message : String(createError);
+				throw new Error(`resume failed (${resumeError}); create failed (${createMessage})`);
+			}
+		}
+		return {
+			agent: handle.agent,
+			dispose: () => handle.dispose().catch((error) => {
+				this.ctx.logger.warn("telegram-duty", `dispose agent error: ${error instanceof Error ? error.message : String(error)}`);
+			})
+		};
+	}
+	async turn(sessionId, text) {
+		const isDuty = sessionId === this.options.dutySessionId;
+		const { agent, dispose } = await this.attach(sessionId, isDuty);
+		try {
+			await agent.whenIdle();
+			const firstSeq = agent.session.seq;
+			agent.followup(createUserMessage({
+				content: [{
+					type: "text",
+					text
+				}],
+				source: {
+					kind: "plugin",
+					plugin: isDuty ? DUTY_SOURCE_PLUGIN : TARGETED_SOURCE_PLUGIN
+				}
+			}));
+			await agent.whenIdle();
+			return summarize(agent.session.snapshotEvents(), firstSeq);
+		} finally {
+			await dispose();
+		}
+	}
+};
+//#endregion
+//#region lib/types/approval.js
+/**
+* Global approval forwarding: while on duty, every session's approval request
+* becomes a numbered Telegram question; the user's reply settles the pending
+* promise, which the approval service turns into the caller's continuation.
+* Timeout and channel failure resolve 'rejected' (fail-closed).
+* @module @luzhengyangtx/dsh-telegram-duty/approval
+*/
+/** Parse a button payload like `appr:7:allow` into its answer. */
+function parseApprovalCallback(data) {
+	const match = /^appr:(\d+):(allow|reject)$/.exec(data);
+	if (match === null) return null;
+	const id = Number(match[1]);
+	if (!Number.isSafeInteger(id)) return null;
+	return {
+		id,
+		decision: match[2] === "allow" ? "allowed-once" : "rejected"
+	};
+}
+const ALLOW_WORDS = /^(同意|允许|批准|好|可以|行|ok|yes|approve|allow)$/i;
+const REJECT_WORDS = /^(拒绝|不同意|取消|不要|不行|no|reject|deny)$/i;
+const NUMBERED_REPLY = /^\s*#?\s*(\d+)\s+(.+?)\s*$/;
+/**
+* Parse one Telegram text as an approval answer.
+* - "3 同意" targets approval #3.
+* - "同意" targets the only pending approval (ambiguous when several).
+*/
+function parseApprovalReply(text, pendingIds) {
+	const numbered = NUMBERED_REPLY.exec(text);
+	if (numbered !== null) {
+		const id = Number(numbered[1]);
+		const word = numbered[2] ?? "";
+		if (ALLOW_WORDS.test(word)) return {
+			kind: "answer",
+			id,
+			decision: "allowed-once"
+		};
+		if (REJECT_WORDS.test(word)) return {
+			kind: "answer",
+			id,
+			decision: "rejected"
+		};
+		return { kind: "none" };
+	}
+	const word = text.trim();
+	if (ALLOW_WORDS.test(word) || REJECT_WORDS.test(word)) {
+		if (pendingIds.length === 1) {
+			const only = pendingIds[0];
+			if (only === void 0) return { kind: "none" };
+			return {
+				kind: "answer",
+				id: only,
+				decision: ALLOW_WORDS.test(word) ? "allowed-once" : "rejected"
+			};
+		}
+		if (pendingIds.length > 1) return { kind: "ambiguous" };
+	}
+	return { kind: "none" };
+}
+/**
+* Process-local registry of unanswered Telegram approvals. Answering, timeout,
+* or an aborted request each settle exactly once and remove the entry.
+*/
+var ApprovalManager = class {
+	deps;
+	nextId = 1;
+	pending = /* @__PURE__ */ new Map();
+	constructor(deps) {
+		this.deps = deps;
+	}
+	/** Ask the user over Telegram; resolves with the closed outcome. */
+	ask(question) {
+		const id = this.nextId;
+		this.nextId += 1;
+		return new Promise((resolve) => {
+			let settled = false;
+			const settle = (outcome) => {
+				if (settled) return;
+				settled = true;
+				const entry = this.pending.get(id);
+				if (entry !== void 0) {
+					clearTimeout(entry.timer);
+					entry.question.signal?.removeEventListener("abort", entry.onAbort);
+					this.pending.delete(id);
+				}
+				resolve(outcome);
+			};
+			const onAbort = () => {
+				settle("cancelled");
+			};
+			const entry = {
+				question,
+				resolve: settle,
+				onAbort,
+				timer: setTimeout(() => {
+					const minutes = Math.round(this.deps.timeoutMs / 6e4);
+					this.deps.send(this.deps.strings.approvalTimeout(id, minutes)).catch(() => void 0);
+					settle("rejected");
+				}, this.deps.timeoutMs)
+			};
+			this.pending.set(id, entry);
+			question.signal?.addEventListener("abort", onAbort, { once: true });
+			if (question.signal?.aborted === true) {
+				settle("cancelled");
+				return;
+			}
+			const minutes = Math.round(this.deps.timeoutMs / 6e4);
+			const reason = question.reason?.trim() ?? "";
+			const keyboard = [[{
+				text: this.deps.strings.approveButton,
+				callback_data: `appr:${id}:allow`
+			}, {
+				text: this.deps.strings.rejectButton,
+				callback_data: `appr:${id}:reject`
+			}]];
+			this.deps.send(this.deps.strings.approvalQuestion(id, question.toolName, reason, minutes), keyboard).catch((error) => {
+				this.deps.log?.(`failed to send approval #${id}: ${error instanceof Error ? error.message : String(error)}`);
+			});
+		});
+	}
+	/** Ids of all unanswered approvals, in issue order. */
+	pendingIds() {
+		return [...this.pending.keys()];
+	}
+	/** Settle one pending approval from a parsed reply; false when unknown. */
+	answer(id, decision) {
+		const entry = this.pending.get(id);
+		if (entry === void 0) return false;
+		entry.resolve(decision);
+		return true;
+	}
+	/** Withdraw every unanswered approval (plugin teardown). */
+	cancelAll() {
+		for (const entry of this.pending.values()) entry.resolve("cancelled");
+		this.pending.clear();
+	}
+};
+//#endregion
+//#region lib/types/ask.js
+/**
+* Telegram question channel for ordinary agent questions (choices,
+* confirmations, missing information): pushes the question to the user's
+* phone with one inline button per option and waits for the answer. Text
+* replies matching an option label work as a fallback.
+* @module @luzhengyangtx/dsh-telegram-duty/ask
+*/
+/** Parse a button payload like `ask:3:1` into an ask id + option index. */
+function parseAskCallback(data) {
+	const match = /^ask:(\d+):(\d+)$/.exec(data);
+	if (match === null) return null;
+	const id = Number(match[1]);
+	const index = Number(match[2]);
+	if (!Number.isSafeInteger(id) || !Number.isSafeInteger(index)) return null;
+	return {
+		id,
+		index
+	};
+}
+/**
+* Process-local registry of unanswered Telegram questions. An option button,
+* a matching text reply, timeout, or an aborted request each settle exactly
+* once and remove the entry.
+*/
+var TelegramAskManager = class {
+	deps;
+	nextId = 1;
+	pending = /* @__PURE__ */ new Map();
+	constructor(deps) {
+		this.deps = deps;
+	}
+	/** Ask the user over Telegram; resolves with the closed outcome. */
+	ask(ask) {
+		const id = this.nextId;
+		this.nextId += 1;
+		return new Promise((resolve) => {
+			let settled = false;
+			const settle = (outcome) => {
+				if (settled) return;
+				settled = true;
+				const entry = this.pending.get(id);
+				if (entry !== void 0) {
+					clearTimeout(entry.timer);
+					ask.signal?.removeEventListener("abort", entry.onAbort);
+					this.pending.delete(id);
+				}
+				resolve(outcome);
+			};
+			const onAbort = () => {
+				settle({ answered: false });
+			};
+			const entry = {
+				options: ask.options,
+				resolve: settle,
+				onAbort,
+				timer: setTimeout(() => {
+					const minutes = Math.round(this.deps.timeoutMs / 6e4);
+					this.deps.send(this.deps.strings.askTimeout(minutes)).catch(() => void 0);
+					settle({ answered: false });
+				}, this.deps.timeoutMs)
+			};
+			this.pending.set(id, entry);
+			ask.signal?.addEventListener("abort", onAbort, { once: true });
+			if (ask.signal?.aborted === true) {
+				settle({ answered: false });
+				return;
+			}
+			const minutes = Math.round(this.deps.timeoutMs / 6e4);
+			const keyboard = ask.options.map((option, index) => [{
+				text: option,
+				callback_data: `ask:${id}:${index}`
+			}]);
+			this.deps.send(this.deps.strings.askQuestion(ask.question, minutes), keyboard).catch((error) => {
+				this.deps.log?.(`failed to send ask #${id}: ${error instanceof Error ? error.message : String(error)}`);
+			});
+		});
+	}
+	/** Settle one pending ask from a parsed button callback; false when unknown. */
+	answerByIndex(id, index) {
+		const entry = this.pending.get(id);
+		if (entry === void 0) return false;
+		const option = entry.options[index];
+		if (option === void 0) return false;
+		entry.resolve({
+			answered: true,
+			optionIndex: index,
+			answer: option
+		});
+		return true;
+	}
+	/**
+	* Text-reply fallback: settle the ask whose option label exactly matches
+	* (case-insensitive). Matches at most one ask, the most recently asked.
+	*/
+	answerByLabel(label) {
+		const trimmed = label.trim().toLowerCase();
+		const entries = [...this.pending.entries()].reverse();
+		for (const [, entry] of entries) {
+			const index = entry.options.findIndex((option) => option.trim().toLowerCase() === trimmed);
+			if (index === -1) continue;
+			const option = entry.options[index];
+			if (option === void 0) continue;
+			entry.resolve({
+				answered: true,
+				optionIndex: index,
+				answer: option
+			});
+			return true;
+		}
+		return false;
+	}
+	/** Withdraw every unanswered ask (plugin teardown). */
+	cancelAll() {
+		for (const entry of this.pending.values()) entry.resolve({ answered: false });
+		this.pending.clear();
+	}
+};
+//#endregion
+//#region lib/types/router.js
+/**
+* Pure text helpers for the Telegram message router: command recognition,
+* targeted-message prefix parsing, session-button callback parsing, and reply
+* chunking under Telegram's 4096-char message limit.
+* @module @luzhengyangtx/dsh-telegram-duty/router
+*/
+/** Recognize the plugin's own slash commands (exact match, trimmed). */
+function parseCommand(text) {
+	const t = text.trim().toLowerCase();
+	if (t === "/away" || t === "/a") return "away";
+	if (t === "/back" || t === "/b") return "back";
+	if (t === "/help" || t === "/h" || t === "/start") return "help";
+	if (t === "/sessions" || t === "/s") return "sessions";
+	if (t === "/duty" || t === "/d") return "duty";
+	if (t === "/unblock" || t === "/u") return "unblock";
+	return null;
+}
+/**
+* Parse a `#N message` prefix used to send one message to a specific session
+* without changing the default route. `#N` alone (no message text) is not a
+* valid prefix; the gateway reports a dedicated hint for that shape.
+*/
+function parseTargetPrefix(text) {
+	const match = /^#\s*(\d+)\s+(.+)$/s.exec(text.trim());
+	if (match === null) return null;
+	const index = Number(match[1]);
+	if (!Number.isSafeInteger(index) || index < 1) return null;
+	return {
+		index,
+		rest: (match[2] ?? "").trim()
+	};
+}
+/** True for a bare `#N` with no message content (needs a dedicated hint). */
+function isBareTargetPrefix(text) {
+	return /^#\s*\d+\s*$/.test(text.trim());
+}
+/** Parse a /sessions button payload like `sess:3` into its snapshot index. */
+function parseSessionCallback(data) {
+	const match = /^sess:(\d+)$/.exec(data);
+	if (match === null) return null;
+	const index = Number(match[1]);
+	if (!Number.isSafeInteger(index) || index < 1) return null;
+	return { index };
+}
+/**
+* Split a long reply into chunks that fit one Telegram message, preferring
+* line boundaries and never splitting inside a ``` fenced code block.
+*/
+function chunkText(text, maxChars) {
+	if (text === "") return [];
+	if (text.length <= maxChars) return [text];
+	const chunks = [];
+	let rest = text;
+	while (rest.length > maxChars) {
+		let cut = rest.slice(0, maxChars).lastIndexOf("\n");
+		if (cut <= 0) cut = maxChars;
+		if ((rest.slice(0, Math.min(rest.length, maxChars + 3)).match(/```/g) ?? []).length % 2 === 1) {
+			const open = rest.indexOf("```");
+			const close = open === -1 ? -1 : rest.indexOf("```", open + 3);
+			if (close > 0 && close < rest.length) cut = close + 3;
+		}
+		chunks.push(rest.slice(0, cut).trimEnd());
+		rest = rest.slice(cut).trimStart();
+	}
+	if (rest !== "") chunks.push(rest);
+	return chunks;
+}
+//#endregion
+//#region lib/types/targeting.js
+/**
+* In-memory session routing state for targeted messages: the numbering
+* snapshot behind `/sessions` buttons and `#N` prefixes, plus the active
+* target (the session every subsequent message goes to). Nothing here is
+* persisted — a DSH restart returns routing to the default duty session.
+* @module @luzhengyangtx/dsh-telegram-duty/targeting
+*/
+/** How long a /sessions numbering snapshot stays valid for `#N` prefixes. */
+const TARGET_SNAPSHOT_TTL_MS = 30 * 6e4;
+/**
+* Routing state: captures the numbering snapshot from each `/sessions`, lets
+* `#N` prefixes and numbered buttons resolve through it, and holds the active
+* target session (null = default duty route).
+*/
+var Targeting = class {
+	ttlMs;
+	entries = [];
+	snapshotAt = 0;
+	active = null;
+	constructor(ttlMs = TARGET_SNAPSHOT_TTL_MS) {
+		this.ttlMs = ttlMs;
+	}
+	/** Replace the numbering snapshot with the current listing (1-based). */
+	capture(items, now = Date.now()) {
+		this.entries = items.map((item) => ({
+			sessionId: item.sessionId,
+			title: item.title
+		}));
+		this.snapshotAt = now;
+	}
+	/** Resolve a 1-based `#N`/button index within the snapshot TTL. */
+	lookup(index, now = Date.now()) {
+		if (this.snapshotAt === 0 || now - this.snapshotAt > this.ttlMs) return void 0;
+		const entry = this.entries[index - 1];
+		return entry === void 0 ? void 0 : { ...entry };
+	}
+	/** True when a snapshot once existed but has aged out. */
+	expired(now = Date.now()) {
+		return this.snapshotAt !== 0 && now - this.snapshotAt > this.ttlMs;
+	}
+	/** Set the active target session (null = default duty route). */
+	setActive(sessionId) {
+		this.active = sessionId;
+	}
+	/** The active target session id, or null for the default duty route. */
+	activeId() {
+		return this.active;
+	}
+};
+/**
+* Display title for the /sessions listing: the duty session gets its fixed
+* name, other sessions use their latest `session/title` event, falling back
+* to the session id. (`session/title` is a plugin-merged event type outside
+* this package's compile-time union, so the scan goes through a cast.)
+*/
+function displayTitle(sessionId, events, isDuty, dutyName) {
+	if (isDuty) return dutyName;
+	for (let index = events.length - 1; index >= 0; index -= 1) {
+		const event = events[index];
+		if (event === void 0) continue;
+		if (event.type !== "session/title") continue;
+		const title = event.data.title;
+		if (typeof title === "string" && title.trim() !== "") return title.trim();
+	}
+	return sessionId;
+}
+/** Source plugin names that mark phone-injected user messages. */
+const PHONE_SOURCE_PLUGINS = new Set(["telegram-duty", "telegram-duty-targeted"]);
+/** True when the event is a phone-injected user message (any target session). */
+function isPhoneSourceEvent(event) {
+	if (event.type !== "user/message") return false;
+	const source = event.data.source;
+	return source.kind === "plugin" && PHONE_SOURCE_PLUGINS.has(source.plugin);
+}
+/** The last assistant text of one turn, joined across text blocks; '' when none. */
+function lastAssistantText(events, turn) {
+	for (let index = events.length - 1; index >= 0; index -= 1) {
+		const event = events[index];
+		if (event?.type !== "assistant/message") continue;
+		if (event.data.turn !== turn) continue;
+		return event.data.message.content.filter((block) => block.type === "text").map((block) => block.text).join("");
+	}
+	return "";
+}
+/** One-line human detail for a non-completed turn end. */
+function reasonDetail(reason, strings) {
+	switch (reason.kind) {
+		case "aborted": return strings.reasonAborted;
+		case "blocked": return strings.reasonBlocked;
+		case "max-tokens": return strings.reasonMaxTokens;
+		case "interrupted": return strings.reasonInterrupted;
+		case "error": return strings.reasonError(reason.error.code, reason.error.message);
+		default: return reason.kind;
+	}
+}
+/**
+* Session-wide turn reporter. Handlers are plain functions so the gateway
+* registers them as `session/event`, `agent/status` and `agent/disposed`
+* listeners; `dispose()` clears the pending settle timers.
+*/
+var TurnWatch = class {
+	ctx;
+	dutyId;
+	isDuty;
+	send;
+	strings;
+	log;
+	settleMs;
+	stretches = /* @__PURE__ */ new Map();
+	phoneFlag = /* @__PURE__ */ new Map();
+	settleTimers = /* @__PURE__ */ new Map();
+	disposed = false;
+	constructor(deps) {
+		this.ctx = deps.ctx;
+		this.dutyId = deps.dutyId;
+		this.isDuty = deps.isDuty;
+		this.send = deps.send;
+		this.strings = deps.strings;
+		this.log = deps.log;
+		this.settleMs = deps.settleMs ?? 500;
+	}
+	/** session/event listener: track phone injections, stretches, and turn reports. */
+	onSessionEvent = (session, event) => {
+		const id = String(session.id);
+		if (event.type === "user/message") {
+			if (isPhoneSourceEvent(event)) this.phoneFlag.set(id, true);
+			return;
+		}
+		if (event.type === "turn/start") {
+			if (id !== this.dutyId && !this.stretches.has(id)) this.stretches.set(id, {
+				startedAt: Date.now(),
+				turns: 0,
+				lastCompleted: false,
+				lastTurnPhone: false
+			});
+			return;
+		}
+		if (event.type !== "turn/end") return;
+		const stretch = this.stretches.get(id);
+		if (stretch === void 0) return;
+		const phone = this.phoneFlag.get(id) === true;
+		this.phoneFlag.delete(id);
+		const reason = event.data.reason;
+		if (reason.kind === "completed") {
+			stretch.turns += 1;
+			stretch.lastCompleted = true;
+			stretch.lastTurnPhone = phone;
+		} else {
+			stretch.lastCompleted = false;
+			stretch.lastTurnPhone = phone;
+		}
+		if (!this.isDuty() || id === this.dutyId || phone) return;
+		if (reason.kind === "completed") {
+			const title = displayTitle(id, session.snapshotEvents(), false, this.strings.dutySessionName);
+			const body = lastAssistantText(session.snapshotEvents(), event.data.turn).trim();
+			const text = body === "" ? this.strings.turnHeader(title, event.data.turn) : `${this.strings.turnHeader(title, event.data.turn)}\n\n${body}`;
+			this.send(text).catch((error) => {
+				this.reportSendFailure(error);
+			});
+		} else {
+			const title = displayTitle(id, session.snapshotEvents(), false, this.strings.dutySessionName);
+			this.send(this.strings.turnFailed(title, event.data.turn, reasonDetail(reason, this.strings))).catch((error) => {
+				this.reportSendFailure(error);
+			});
+		}
+	};
+	/** agent/status listener: schedule the completion settle on idle transitions. */
+	onAgentStatus = ({ agent, status }) => {
+		if (status !== "idle") return;
+		const id = String(agent.id);
+		if (!this.stretches.has(id)) return;
+		const existing = this.settleTimers.get(id);
+		if (existing !== void 0) clearTimeout(existing);
+		this.settleTimers.set(id, setTimeout(() => {
+			this.settle(id);
+		}, this.settleMs));
+	};
+	/** agent/disposed listener: drop all state for a session that went away. */
+	onAgentDisposed = ({ agent }) => {
+		this.forget(String(agent.id));
+	};
+	/** Clear pending settle timers (plugin teardown). */
+	dispose() {
+		this.disposed = true;
+		for (const timer of this.settleTimers.values()) clearTimeout(timer);
+		this.settleTimers.clear();
+	}
+	/**
+	* The settle check: when the agent is still running or has queued work,
+	* keep the stretch (the next idle transition re-settles); otherwise close
+	* it and, when eligible, send the completion line.
+	*/
+	settle(id) {
+		this.settleTimers.delete(id);
+		if (this.disposed) return;
+		const stretch = this.stretches.get(id);
+		if (stretch === void 0) return;
+		const agent = this.ctx.agents.get(SessionId(id));
+		if (agent !== void 0) {
+			if (agent.status === "running" || agent.inbox.nextStep.length > 0 || agent.inbox.nextTurn.length > 0) return;
+		}
+		this.stretches.delete(id);
+		if (!(agent !== void 0 && this.isDuty() && id !== this.dutyId && stretch.lastCompleted && stretch.turns >= 1 && !stretch.lastTurnPhone)) return;
+		const title = displayTitle(id, agent.session.snapshotEvents(), false, this.strings.dutySessionName);
+		const minutes = Math.max(1, Math.round((Date.now() - stretch.startedAt) / 6e4));
+		this.send(this.strings.turnDone(title, stretch.turns, minutes)).catch((error) => {
+			this.reportSendFailure(error);
+		});
+	}
+	/** Drop everything tracked for one session id. */
+	forget(id) {
+		this.stretches.delete(id);
+		this.phoneFlag.delete(id);
+		const timer = this.settleTimers.get(id);
+		if (timer !== void 0) {
+			clearTimeout(timer);
+			this.settleTimers.delete(id);
+		}
+	}
+	reportSendFailure(error) {
+		this.log?.(`turn-watch send failed: ${error instanceof Error ? error.message : String(error)}`);
+	}
+};
+//#endregion
+//#region lib/types/pending.js
+/**
+* Pending-approval scan: folds a session log for `approval/asked` records
+* without a matching `approval/decided` — i.e. approvals still waiting on an
+* answerer. The gateway uses it to warn on `/away` that the web UI holds
+* unanswered approvals (the phone cannot answer an already-web-claimed
+* approval) and to find sessions `/unblock` must cancel.
+* @module @luzhengyangtx/dsh-telegram-duty/pending
+*/
+/**
+* Undecided approvals in a session log, in chronological order. Scans
+* backwards with a decided-id set — the same fold the API proxy uses to pair
+* asked/decided audit events.
+*/
+function scanPendingApprovals(events) {
+	const decided = /* @__PURE__ */ new Set();
+	const pending = [];
+	for (let index = events.length - 1; index >= 0; index -= 1) {
+		const event = events[index];
+		if (event === void 0) continue;
+		if (event.type === "approval/decided") decided.add(event.data.id);
+		else if (event.type === "approval/asked") {
+			if (decided.has(event.data.id)) continue;
+			pending.push({
+				id: event.data.id,
+				toolName: event.data.toolName,
+				...event.data.reason !== void 0 ? { reason: event.data.reason } : {}
+			});
+		}
+	}
+	pending.reverse();
+	return pending;
+}
+//#endregion
+//#region lib/types/i18n.js
+/**
+* User-facing string table for the Telegram channel. Every text the user can
+* see on their phone lives here; `language` selects the table ('zh' | 'en').
+* @module @luzhengyangtx/dsh-telegram-duty/i18n
+*/
+const zh = {
+	dutyOn: "🔔 已进入值守模式：审批将转发到手机，网页弹窗暂停。回复 /back 或回电脑后在网页发条消息即可切回。",
+	dutyOff: "🖥 已回到本地模式：审批恢复网页弹窗。",
+	alreadyDuty: "🔔 已在值守模式中。",
+	alreadyLocal: "🖥 当前就是本地模式，审批在网页弹窗。",
+	help: [
+		"🤖 DSH 值班机器人",
+		"",
+		"· 直接发消息 → 值班智能体开始干活，完成后回复你",
+		"· /sessions → 列出在线会话，点编号后消息就发给该会话",
+		"· 消息前加 #编号 → 只把这一条发给指定会话（如 #1 帮我看看进度）",
+		"· /duty → 回到默认值班会话路由",
+		"· /unblock → 取消被审批卡住的回合（网页审批未处理时自救）",
+		"· /away → 进入值守模式（审批转到手机）",
+		"· /back → 回到本地模式（审批恢复网页弹窗）",
+		"· 发消息即自动进入值守；回电脑在网页发条消息即自动切回本地",
+		"· 审批回复格式：3 同意 / 3 拒绝"
+	].join("\n"),
+	approvalQuestion: (id, toolName, reason, minutes) => `【审批 #${id}】工具「${toolName}」请求批准${reason !== "" ? `：${reason}` : ""}\n回复 ${id} 同意 / ${id} 拒绝（${minutes} 分钟内有效）`,
+	approvalTimeout: (id, minutes) => `【审批 #${id}】已超时（${minutes} 分钟），按拒绝处理。`,
+	approvalAccepted: (id) => `【审批 #${id}】✅ 已同意。`,
+	approvalRejected: (id) => `【审批 #${id}】⛔ 已拒绝。`,
+	approvalUnknown: (id) => `【审批 #${id}】不存在或已超时。`,
+	approvalAmbiguous: (count, first) => `有 ${count} 条审批待处理，请带编号回复，例如：${first} 同意`,
+	ack: "📨 收到，正在生成…",
+	taskError: (error) => `⚠️ 处理出错：${error}`,
+	dutyEmpty: "😶 会话没有返回内容，请再试一次。",
+	dutyPersona: [
+		"你是用户的 Telegram 值班助手，通过手机消息与用户联系。",
+		"要求：用简体中文回复，简洁务实；回答前先查看相关项目的进度文件（如工作区下的 task_plan.md、progress.md、HANDOFF.md、CLAUDE.md）再作答；",
+		"执行任务时遵循工作区 CLAUDE.md 的用户规则；",
+		"拿不准意图先问清楚再动手；需要向用户提问、让用户做选择或确认时，优先使用 telegram_ask 工具（把问题推送到用户手机）；",
+		"需要向用户汇报、提醒或推送消息时，使用 telegram_notify 工具（不等待回复）；",
+		"重要操作完成后简短汇报结果。"
+	].join(""),
+	approveButton: "✅ 同意",
+	rejectButton: "⛔ 拒绝",
+	askQuestion: (question, minutes) => `❓ ${question}\n（${minutes} 分钟内回复，点按钮或直接回复选项）`,
+	askTimeout: (minutes) => `❓ 提问已超时（${minutes} 分钟），未收到回答。`,
+	askAnswered: "✅ 已选择",
+	callbackUnknown: "该按钮已失效或已处理。",
+	sessionsTitle: "🗂 会话列表（点编号定向；💤 离线，首条消息自动唤醒）：",
+	sessionsEntry: (index, title, status) => `[${index}] ${title} · ${status}`,
+	sessionsNone: "当前没有任何会话。先给机器人发一条消息唤醒值班会话，然后再试。",
+	statusIdle: "空闲",
+	statusRunning: "忙碌",
+	statusOffline: "离线",
+	dutySessionName: "值班会话",
+	targeted: (title) => `🎯 已定向到「${title}」，后续消息都发给它。发送 /duty 回到值班会话。`,
+	targetAck: "✅ 已定向",
+	dutyReset: "🏠 已回到默认值班会话路由。",
+	snapshotExpired: "⏳ 会话列表快照已过期，请重新发送 /sessions。",
+	prefixUnknown: (index) => `❓ 编号 ${index} 不在最近的会话列表中，请重新发送 /sessions 查看当前列表。`,
+	prefixNeedsText: "请把消息内容写在编号后面，例如：#1 帮我看看进度。",
+	sessionOffline: (title) => `🛑 会话「${title}」已离线且无法唤醒，请重新发送 /sessions 选择在线会话。`,
+	pendingWebApprovals: (lines) => `⚠️ 网页上还有待处理的审批（手机无法代答已弹出的审批）：\n${lines}\n回复 /unblock 取消卡住的回合，或回电脑处理。`,
+	unblocked: (count) => `🧹 已取消 ${count} 个被审批卡住的回合，可以重新发送任务（此时审批会正确推到手机）。`,
+	unblockNothing: "✅ 当前没有被审批卡住的会话。",
+	turnHeader: (title, turn) => `📄 ${title} · 第 ${turn} 轮结束`,
+	turnFailed: (title, turn, detail) => `⚠️ ${title} · 第 ${turn} 轮结束：${detail}`,
+	turnDone: (title, turns, minutes) => `✅ ${title} · 任务完成（共 ${turns} 轮，用时 ${minutes} 分钟）`,
+	reasonAborted: "被取消",
+	reasonBlocked: "阻塞",
+	reasonMaxTokens: "超出输出上限",
+	reasonInterrupted: "意外中断",
+	reasonError: (code, message) => `出错（${code}：${message}）`,
+	promptNote: "本环境提供 telegram_notify 工具：把一条消息推送到用户手机（不等待回复），需要汇报、提醒或推送消息时优先使用；需要用户选择或确认时使用 telegram_ask 工具（把问题推到手机并等待回答）。"
+};
+const en = {
+	dutyOn: "🔔 Duty mode on: approvals are forwarded to your phone and web popups are paused. Reply /back or send a message in the web UI to switch back.",
+	dutyOff: "🖥 Local mode: approvals show in the web UI again.",
+	alreadyDuty: "🔔 Already in duty mode.",
+	alreadyLocal: "🖥 Already in local mode; approvals appear in the web UI.",
+	help: [
+		"🤖 DSH Duty Bot",
+		"",
+		"· Send a message → the duty agent works on it and replies",
+		"· /sessions → list live sessions; tap a number to route messages there",
+		"· Prefix a message with #N → send just that one to session N (e.g. #1 check my progress)",
+		"· /duty → back to the default duty-session route",
+		"· /unblock → cancel turns stuck on unanswered web approvals",
+		"· /away → enter duty mode (approvals go to your phone)",
+		"· /back → return to local mode (approvals stay in the web UI)",
+		"· Any phone message switches to duty automatically; any web message switches back",
+		"· Approval replies: 3 approve / 3 reject"
+	].join("\n"),
+	approvalQuestion: (id, toolName, reason, minutes) => `[Approval #${id}] Tool "${toolName}" requests approval${reason !== "" ? `: ${reason}` : ""}\nReply ${id} approve / ${id} reject (valid ${minutes} min)`,
+	approvalTimeout: (id, minutes) => `[Approval #${id}] timed out (${minutes} min), treated as rejected.`,
+	approvalAccepted: (id) => `[Approval #${id}] ✅ approved.`,
+	approvalRejected: (id) => `[Approval #${id}] ⛔ rejected.`,
+	approvalUnknown: (id) => `[Approval #${id}] does not exist or has timed out.`,
+	approvalAmbiguous: (count, first) => `${count} approvals are pending; include the number, e.g. ${first} approve`,
+	ack: "📨 Received, generating…",
+	taskError: (error) => `⚠️ Processing error: ${error}`,
+	dutyEmpty: "😶 The session returned no content, please try again.",
+	dutyPersona: [
+		"You are the user's Telegram duty assistant, reached through phone messages.",
+		"Reply in the user's language, concisely and practically; before answering, inspect the relevant project progress files (task_plan.md, progress.md, HANDOFF.md, CLAUDE.md) in the workspace;",
+		"follow the workspace CLAUDE.md user rules when acting;",
+		"when unsure of intent, ask before acting; when you need to ask the user a question, confirm something, or offer choices, prefer the telegram_ask tool (it pushes the question to the user's phone);",
+		"to report, remind, or push a message to the user, use the telegram_notify tool (no reply expected);",
+		"briefly report after important work completes."
+	].join(" "),
+	approveButton: "✅ Approve",
+	rejectButton: "⛔ Reject",
+	askQuestion: (question, minutes) => `❓ ${question}\n(Reply within ${minutes} min — tap a button or type an option)`,
+	askTimeout: (minutes) => `❓ The question timed out (${minutes} min) with no answer.`,
+	askAnswered: "✅ Answered",
+	callbackUnknown: "That button is no longer valid.",
+	sessionsTitle: "🗂 Sessions (tap a number to route; 💤 offline, woken on first message):",
+	sessionsEntry: (index, title, status) => `[${index}] ${title} · ${status}`,
+	sessionsNone: "There are no sessions right now. Send the bot a message first to wake the duty session, then try again.",
+	statusIdle: "idle",
+	statusRunning: "busy",
+	statusOffline: "offline",
+	dutySessionName: "Duty session",
+	targeted: (title) => `🎯 Routed to "${title}"; following messages go there. Send /duty to return to the duty session.`,
+	targetAck: "✅ Routed",
+	dutyReset: "🏠 Back to the default duty-session route.",
+	snapshotExpired: "⏳ The session list snapshot expired — please send /sessions again.",
+	prefixUnknown: (index) => `❓ Number ${index} is not in the recent session list — please send /sessions again.`,
+	prefixNeedsText: "Put the message after the number, e.g. #1 check my progress.",
+	sessionOffline: (title) => `🛑 Session "${title}" is offline and could not be woken — please send /sessions and pick a live session.`,
+	pendingWebApprovals: (lines) => `⚠️ The web UI still holds unanswered approvals (the phone cannot answer an already-shown popup):\n${lines}\nReply /unblock to cancel the stuck turns, or handle them on the computer.`,
+	unblocked: (count) => `🧹 Cancelled ${count} turn(s) stuck on approvals — resend the task (approvals now go to your phone).`,
+	unblockNothing: "✅ No session is currently stuck on an approval.",
+	turnHeader: (title, turn) => `📄 ${title} · turn ${turn} ended`,
+	turnFailed: (title, turn, detail) => `⚠️ ${title} · turn ${turn} ended: ${detail}`,
+	turnDone: (title, turns, minutes) => `✅ ${title} · task complete (${turns} turns, ${minutes} min)`,
+	reasonAborted: "cancelled",
+	reasonBlocked: "blocked",
+	reasonMaxTokens: "output limit reached",
+	reasonInterrupted: "interrupted",
+	reasonError: (code, message) => `error (${code}: ${message})`,
+	promptNote: "This environment provides a telegram_notify tool: push one message to the user's phone (no reply expected); prefer it for reports, reminders, and notifications. For choices and confirmations use the telegram_ask tool (push a question to the phone and wait)."
+};
+/** Resolve the message table for one language. */
+function stringsFor(language) {
+	return language === "zh" ? zh : en;
+}
+//#endregion
+//#region lib/types/gateway.js
+/**
+* Gateway orchestration: whitelisted Telegram messages are routed to command
+* handling, approval answers, or the duty session (or a targeted session via
+* /sessions buttons and `#N` prefixes); watch-mode transitions and the global
+* approval answerer live here. Task messages get an immediate ack plus a
+* looping "typing…" indicator until the turn settles.
+* @module @luzhengyangtx/dsh-telegram-duty/gateway
+*/
+/** How often to re-send the typing indicator (Telegram shows it ~5 s). */
+const TYPING_INTERVAL_MS = 4e3;
+/**
+* Start the phone's "bot is typing…" animation: one immediate chat action,
+* then a beat every `intervalMs` until `stop()` (each action lasts ~5 s on
+* Telegram, so the interval must be shorter). Never throws.
+*/
+function startTypingLoop(sendChatAction, chatId, intervalMs, log) {
+	const beat = () => {
+		sendChatAction(chatId, "typing").catch((error) => {
+			log?.(`sendChatAction failed: ${error instanceof Error ? error.message : String(error)}`);
+		});
+	};
+	beat();
+	const timer = setInterval(beat, intervalMs);
+	return { stop: () => {
+		clearInterval(timer);
+	} };
+}
+/** All gateway state for one plugin run. */
+var Gateway = class {
+	ctx;
+	runtime;
+	client;
+	settings;
+	stateOn;
+	stateOff;
+	dutyId;
+	driver;
+	targeting = new Targeting();
+	approvals;
+	asks;
+	poller;
+	strings;
+	inflight = /* @__PURE__ */ new Set();
+	mode;
+	/** Turn/completion reporter for the other sessions (registered in index.ts). */
+	watch;
+	constructor(deps) {
+		this.ctx = deps.ctx;
+		this.runtime = deps.runtime;
+		this.client = deps.client;
+		this.settings = deps.settings;
+		this.stateOn = deps.stateOn;
+		this.stateOff = deps.stateOff;
+		this.dutyId = deps.runtime.sessionId ?? "telegram-duty";
+		this.mode = deps.settings.get().watchMode ?? "local";
+		this.strings = stringsFor(deps.settings.get().language ?? "en");
+		this.driver = new SessionDriver(deps.ctx, {
+			dutySessionId: this.dutyId,
+			cwd: deps.runtime.dutyCwd ?? process.cwd(),
+			persona: this.strings.dutyPersona
+		});
+		this.approvals = new ApprovalManager({
+			timeoutMs: (deps.runtime.approvalTimeoutMinutes ?? 10) * 6e4,
+			strings: this.strings,
+			send: (text, keyboard) => this.sendChunked(text, keyboard),
+			log: (message) => {
+				this.ctx.logger.warn("telegram-duty", message);
+			}
+		});
+		this.asks = new TelegramAskManager({
+			timeoutMs: (deps.runtime.approvalTimeoutMinutes ?? 10) * 6e4,
+			strings: this.strings,
+			send: (text, keyboard) => this.sendChunked(text, keyboard),
+			log: (message) => {
+				this.ctx.logger.warn("telegram-duty", message);
+			}
+		});
+		this.watch = new TurnWatch({
+			ctx: deps.ctx,
+			dutyId: this.dutyId,
+			isDuty: () => this.mode === "duty",
+			send: (text) => this.sendChunked(text),
+			strings: this.strings,
+			log: (message) => {
+				this.ctx.logger.warn("telegram-duty", message);
+			}
+		});
+		this.poller = new Poller({
+			client: deps.client,
+			dataDir: deps.runtime.dataDir ?? ".",
+			onUpdate: (update) => {
+				this.spawn(() => this.handleUpdate(update));
+			},
+			onChannelState: (up) => {
+				this.ctx.logger.info("telegram-duty", up ? "Telegram channel up" : "Telegram channel down");
+			},
+			onError: (error) => {
+				this.ctx.logger.warn("telegram-duty", `poll error: ${error.message}`);
+			}
+		});
+		this.settings.watch((next) => {
+			this.mode = next.watchMode ?? "local";
+		});
+	}
+	/** Run one message handler fire-and-forget, containing its failures. */
+	spawn(task) {
+		const run = task().catch((error) => {
+			this.ctx.logger.warn("telegram-duty", `message handler failed: ${error instanceof Error ? error.message : String(error)}`);
+		});
+		this.inflight.add(run);
+		run.finally(() => {
+			this.inflight.delete(run);
+		});
+	}
+	start() {
+		this.poller.start();
+		this.refreshStateMarker();
+	}
+	/**
+	* Publish the current mode through the marker namespace whose name the
+	* browser half reads from the forwarded settings event.
+	*/
+	async refreshStateMarker() {
+		await this.pushStateMarker(this.mode);
+	}
+	/** telegram_ask tool body: push a question to the phone and wait. */
+	async askUser(question, options, signal) {
+		return await this.asks.ask({
+			question,
+			options,
+			...signal !== void 0 ? { signal } : {}
+		});
+	}
+	/** Command body: switch duty back to local (and notify the phone). */
+	async switchToLocal() {
+		await this.setMode("local", true);
+	}
+	/** Command body: switch duty on from the web (and notify the phone). */
+	async switchToDuty() {
+		await this.setMode("duty", true);
+	}
+	/** Sidebar-button entry point: attach the duty session without a turn. */
+	async ensureDutyLive() {
+		return await this.driver.ensureLive();
+	}
+	async pushStateMarker(mode) {
+		const scope = mode === "duty" ? this.stateOn : this.stateOff;
+		try {
+			await scope.update({ n: Date.now() });
+		} catch (error) {
+			this.ctx.logger.warn("telegram-duty", `state marker write failed: ${error instanceof Error ? error.message : String(error)}`);
+		}
+	}
+	async stop() {
+		this.approvals.cancelAll();
+		this.asks.cancelAll();
+		await this.poller.stop();
+		await Promise.allSettled([...this.inflight]);
+		this.client.close();
+	}
+	/** approval/request answerer: take over while on duty, else defer to web. */
+	onApprovalRequest = async (req, next) => {
+		if (this.mode !== "duty") return await next();
+		return await this.approvals.ask({
+			toolName: req.toolName,
+			...req.reason !== void 0 ? { reason: req.reason } : {},
+			...req.signal !== void 0 ? { signal: req.signal } : {}
+		});
+	};
+	/** session/event hook: a real user message from the web UI ends duty mode. */
+	onSessionEvent = (session, event) => {
+		if (this.mode !== "duty") return;
+		if (event.type !== "user/message") return;
+		if (event.data.source.kind !== "user") return;
+		this.setMode("local", true);
+		this.ctx.logger.info("telegram-duty", `user message in session ${session.id} → local mode`);
+	};
+	/** Poller entry point (public for tests). */
+	async handleUpdate(update) {
+		const callback = update.callback_query;
+		if (callback !== void 0) {
+			await this.handleCallback(callback);
+			return;
+		}
+		const message = update.message;
+		if (message === void 0) return;
+		const text = message.text;
+		if (text === void 0 || text.trim() === "") return;
+		if (message.chat.id !== this.chatId()) {
+			this.ctx.logger.info("telegram-duty", `ignoring message from chat ${message.chat.id} (whitelist is ${this.chatId()})`);
+			return;
+		}
+		const trimmed = text.trim();
+		const parse = parseApprovalReply(trimmed, this.approvals.pendingIds());
+		if (parse.kind === "answer") {
+			if (this.approvals.answer(parse.id, parse.decision)) await this.sendChunked(parse.decision === "allowed-once" ? this.strings.approvalAccepted(parse.id) : this.strings.approvalRejected(parse.id));
+			else await this.sendChunked(this.strings.approvalUnknown(parse.id));
+			return;
+		}
+		if (parse.kind === "ambiguous") {
+			const first = this.approvals.pendingIds()[0];
+			await this.sendChunked(this.strings.approvalAmbiguous(this.approvals.pendingIds().length, first ?? 1));
+			return;
+		}
+		if (this.asks.answerByLabel(trimmed)) {
+			await this.sendChunked(this.strings.askAnswered);
+			return;
+		}
+		const command = parseCommand(trimmed);
+		if (command === "away") {
+			if (this.mode === "duty") await this.sendChunked(this.strings.alreadyDuty + "\n" + this.strings.dutyOn);
+			else {
+				await this.setMode("duty", true);
+				await this.warnPendingWebApprovals();
+			}
+			return;
+		}
+		if (command === "back") {
+			if (this.mode === "local") await this.sendChunked(this.strings.alreadyLocal);
+			else await this.setMode("local", true);
+			return;
+		}
+		if (command === "help") {
+			await this.sendChunked(this.strings.help);
+			return;
+		}
+		if (command === "sessions") {
+			await this.handleSessionsCommand();
+			return;
+		}
+		if (command === "duty") {
+			this.targeting.setActive(null);
+			await this.sendChunked(this.strings.dutyReset);
+			return;
+		}
+		if (command === "unblock") {
+			await this.handleUnblockCommand();
+			return;
+		}
+		if (isBareTargetPrefix(trimmed)) {
+			await this.sendChunked(this.strings.prefixNeedsText);
+			return;
+		}
+		let targetId = this.targeting.activeId() ?? this.dutyId;
+		let targetTitle;
+		let taskText = trimmed;
+		const prefix = parseTargetPrefix(trimmed);
+		if (prefix !== null) {
+			const lookup = this.targeting.lookup(prefix.index);
+			if (lookup === void 0) {
+				await this.sendChunked(this.targeting.expired() ? this.strings.snapshotExpired : this.strings.prefixUnknown(prefix.index));
+				return;
+			}
+			targetId = lookup.sessionId;
+			targetTitle = lookup.title;
+			taskText = prefix.rest;
+		}
+		await this.sendChunked(this.strings.ack);
+		await this.setMode("duty", true);
+		const typing = startTypingLoop((chatId, action) => this.client.sendChatAction(chatId, action), this.chatId(), TYPING_INTERVAL_MS, (message) => {
+			this.ctx.logger.warn("telegram-duty", message);
+		});
+		let outcome;
+		try {
+			outcome = await this.driver.runIn(targetId, taskText);
+		} finally {
+			typing.stop();
+		}
+		if (outcome.cancelled === true) return;
+		if (outcome.error === "OFFLINE") await this.sendChunked(this.strings.sessionOffline(targetTitle ?? targetId));
+		else if (outcome.error !== void 0) await this.sendChunked(this.strings.taskError(outcome.error));
+		else if (outcome.text.trim() === "") await this.sendChunked(this.strings.dutyEmpty);
+		else await this.sendChunked(outcome.text.trim());
+	}
+	/**
+	* /sessions: list the user's MAIN workspace sessions (in the web sidebar's
+	* workspace order), with numbered buttons — live ones first by that order
+	* (空闲/忙碌), then persisted-but-cold ones (离线, woken on the first
+	* targeted message). The internal duty session and non-workspace sessions
+	* are not listed. Without a workspace registry (headless), live top-level
+	* sessions minus the duty session are listed instead.
+	*/
+	async handleSessionsCommand() {
+		const items = [];
+		const registry = this.ctx.get("workspaceRegistry");
+		if (registry === void 0) for (const agent of this.ctx.agents.roots()) {
+			if (items.length >= 50) break;
+			const id = String(agent.id);
+			if (id === this.dutyId) continue;
+			const events = agent.session.snapshotEvents();
+			items.push({
+				sessionId: id,
+				title: displayTitle(id, events, false, this.strings.dutySessionName),
+				status: agent.status
+			});
+		}
+		else {
+			const archived = new Set(registry.archivedSessionIds.map((id) => String(id)));
+			const order = [];
+			for (const workspace of registry.list()) for (const id of workspace.sessionIds) {
+				const key = String(id);
+				if (key === this.dutyId || archived.has(key) || order.includes(key)) continue;
+				order.push(key);
+			}
+			const liveById = new Map(this.ctx.agents.roots().map((agent) => [String(agent.id), agent]));
+			let coldById;
+			if (order.length > 0) {
+				const persistence = this.ctx.get("sessionPersistence");
+				if (persistence !== void 0) try {
+					const headers = await persistence.list();
+					coldById = new Map(headers.map((meta) => [String(meta.id), {
+						id: String(meta.id),
+						createdAt: meta.createdAt,
+						meta
+					}]));
+				} catch (error) {
+					this.ctx.logger.warn("telegram-duty", `cold session listing failed: ${error instanceof Error ? error.message : String(error)}`);
+				}
+			}
+			const cache = this.ctx.get("sessionProjectionCache");
+			for (const id of order) {
+				if (items.length >= 50) break;
+				const live = liveById.get(id);
+				if (live !== void 0) {
+					if (live.session.seq === 0) continue;
+					items.push({
+						sessionId: id,
+						title: displayTitle(id, live.session.snapshotEvents(), false, this.strings.dutySessionName),
+						status: live.status
+					});
+					continue;
+				}
+				const cold = coldById?.get(id);
+				if (cold === void 0) continue;
+				const snapshot = cache?.cachedSnapshot(cold.meta);
+				if (snapshot?.values.sessionListMetadata?.blank === true) continue;
+				const title = snapshot?.values.title;
+				items.push({
+					sessionId: id,
+					title: typeof title === "string" && title.trim() !== "" ? title.trim() : id,
+					status: "offline"
+				});
+			}
+		}
+		if (items.length === 0) {
+			await this.sendChunked(this.strings.sessionsNone);
+			return;
+		}
+		this.targeting.capture(items);
+		const lines = items.map((item, index) => this.strings.sessionsEntry(index + 1, item.title, item.status === "idle" ? this.strings.statusIdle : item.status === "running" ? this.strings.statusRunning : this.strings.statusOffline));
+		const keyboard = items.map((_item, index) => [{
+			text: String(index + 1),
+			callback_data: `sess:${index + 1}`
+		}]);
+		await this.sendChunked([this.strings.sessionsTitle, ...lines].join("\n"), keyboard);
+	}
+	/**
+	* /away helper: after entering duty mode, list approvals the web UI still
+	* holds (the phone cannot answer an already-web-claimed approval).
+	*/
+	async warnPendingWebApprovals() {
+		const lines = [];
+		for (const agent of this.ctx.agents.list()) {
+			const pending = scanPendingApprovals(agent.session.snapshotEvents());
+			if (pending.length === 0) continue;
+			const id = String(agent.id);
+			const title = displayTitle(id, agent.session.snapshotEvents(), id === this.dutyId, this.strings.dutySessionName);
+			for (const item of pending) lines.push(`· 工具「${item.toolName}」（${title}）`);
+		}
+		if (lines.length > 0) await this.sendChunked(this.strings.pendingWebApprovals(lines.join("\n")));
+	}
+	/**
+	* /unblock: cancel the active turn of every live session that is stuck on
+	* an unanswered approval (the turn abort settles the approval as
+	* 'cancelled' and the task can be resent with phone-side approvals).
+	*/
+	async handleUnblockCommand() {
+		let cancelled = 0;
+		for (const agent of this.ctx.agents.list()) {
+			if (scanPendingApprovals(agent.session.snapshotEvents()).length === 0) continue;
+			agent.cancel({ kind: "user" });
+			cancelled += 1;
+			this.ctx.logger.info("telegram-duty", `unblock: cancelled turn of session ${String(agent.id)}`);
+		}
+		await this.sendChunked(cancelled > 0 ? this.strings.unblocked(cancelled) : this.strings.unblockNothing);
+	}
+	/** telegram_notify tool body: push one message to the phone, no waiting. */
+	async notifyPhone(text) {
+		await this.sendChunked(text);
+	}
+	chatId() {
+		return this.runtime.chatId ?? 0;
+	}
+	async setMode(mode, notify) {
+		if (this.mode === mode) return;
+		this.mode = mode;
+		try {
+			await this.settings.update({ watchMode: mode });
+		} catch (error) {
+			this.ctx.logger.warn("telegram-duty", `persisting watchMode failed: ${error instanceof Error ? error.message : String(error)}`);
+		}
+		await this.pushStateMarker(mode);
+		if (notify) await this.sendChunked(mode === "duty" ? this.strings.dutyOn : this.strings.dutyOff);
+	}
+	/** Handle one inline-button press. */
+	async handleCallback(query) {
+		const chatId = query.message?.chat.id;
+		if (chatId === void 0 || chatId !== this.chatId()) {
+			this.ctx.logger.info("telegram-duty", `ignoring callback from chat ${chatId ?? "unknown"}`);
+			return;
+		}
+		const data = query.data ?? "";
+		let ack;
+		let targetedTitle;
+		const session = parseSessionCallback(data);
+		if (session !== null) {
+			const entry = this.targeting.lookup(session.index);
+			if (entry === void 0) ack = this.targeting.expired() ? this.strings.snapshotExpired : this.strings.callbackUnknown;
+			else {
+				this.targeting.setActive(entry.sessionId);
+				ack = this.strings.targetAck;
+				targetedTitle = entry.title;
+			}
+		} else {
+			const approval = parseApprovalCallback(data);
+			if (approval !== null) if (this.approvals.answer(approval.id, approval.decision)) ack = approval.decision === "allowed-once" ? this.strings.approvalAccepted(approval.id) : this.strings.approvalRejected(approval.id);
+			else ack = this.strings.approvalUnknown(approval.id);
+			else {
+				const ask = parseAskCallback(data);
+				if (ask !== null) ack = this.asks.answerByIndex(ask.id, ask.index) ? this.strings.askAnswered : this.strings.callbackUnknown;
+				else ack = this.strings.callbackUnknown;
+			}
+		}
+		try {
+			await this.client.answerCallbackQuery(query.id, ack.slice(0, 190));
+		} catch (error) {
+			this.ctx.logger.warn("telegram-duty", `answerCallbackQuery failed: ${error instanceof Error ? error.message : String(error)}`);
+		}
+		if (targetedTitle !== void 0) await this.sendChunked(this.strings.targeted(targetedTitle));
+	}
+	/** Send one text, split under Telegram's message limit; never throws. */
+	async sendChunked(text, keyboard) {
+		const chunks = chunkText(text, this.runtime.replyChunkChars ?? 3800);
+		for (const [index, chunk] of chunks.entries()) try {
+			await this.client.sendMessage(this.chatId(), chunk, index === 0 && keyboard !== void 0 ? { keyboard } : {});
+		} catch (error) {
+			this.ctx.logger.warn("telegram-duty", `sendMessage failed: ${error instanceof Error ? error.message : String(error)}`);
+		}
+	}
+};
+//#endregion
+//#region lib/types/ask-tool.js
+/**
+* Model-facing telegram_ask tool: the agent asks the user a question over
+* Telegram (their phone) and waits for the answer — one inline button per
+* option, text replies matching an option label as fallback.
+* @module @luzhengyangtx/dsh-telegram-duty/ask-tool
+*/
+/** Build the telegram_ask tool bound to one gateway. */
+function telegramAskTool(gateway) {
+	return defineTool({
+		name: "telegram_ask",
+		description: "Ask the user a question over Telegram (their phone) and wait for the answer. Use it when you need the user to choose between options, confirm something, or supply missing information. Provide 2 to 4 short options; the user taps a button or replies with one option. Resolves with the chosen option, or answered=false when the user does not respond in time.",
+		parameters: {
+			question: {
+				type: "string",
+				required: true,
+				description: "The specific question to ask the user."
+			},
+			options: {
+				type: "array",
+				required: true,
+				description: "2 to 4 short choice labels; the user picks one.",
+				items: { type: "string" }
+			}
+		},
+		output: {
+			schema: {
+				type: "object",
+				additionalProperties: false,
+				properties: {
+					answered: {
+						type: "boolean",
+						required: true
+					},
+					answer: { type: "string" },
+					optionIndex: { type: "number" }
+				}
+			},
+			render: (_args, value) => [{
+				type: "text",
+				text: JSON.stringify(value)
+			}]
+		},
+		async execute(args, exec) {
+			if (!Array.isArray(args.options) || args.options.length < 2 || args.options.length > 4) throw new Error("telegram_ask requires 2 to 4 options");
+			const outcome = await gateway.askUser(args.question, args.options, exec.signal);
+			return {
+				answered: outcome.answered,
+				...outcome.answer !== void 0 ? { answer: outcome.answer } : {},
+				...outcome.optionIndex !== void 0 ? { optionIndex: outcome.optionIndex } : {}
+			};
+		}
+	});
+}
+//#endregion
+//#region lib/types/notify-tool.js
+/**
+* Model-facing telegram_notify tool: push one message to the user's phone
+* (Telegram) without waiting for a reply. Every session's agent can use it to
+* report, remind, or notify — the proactive-push counterpart of telegram_ask.
+* @module @luzhengyangtx/dsh-telegram-duty/notify-tool
+*/
+/** Build the telegram_notify tool bound to one gateway. */
+function telegramNotifyTool(gateway) {
+	return defineTool({
+		name: "telegram_notify",
+		description: "Push one message to the user's phone over Telegram; does not wait for a reply. Use it to report completion, remind the user, or send a notification from any conversation.",
+		parameters: { message: {
+			type: "string",
+			required: true,
+			description: "The message text to send to the user's phone."
+		} },
+		output: {
+			schema: {
+				type: "object",
+				additionalProperties: false,
+				properties: { sent: {
+					type: "boolean",
+					required: true
+				} }
+			},
+			render: (_args, value) => [{
+				type: "text",
+				text: JSON.stringify(value)
+			}]
+		},
+		async execute(args) {
+			const text = args.message.trim();
+			if (text === "") throw new Error("telegram_notify: message must not be empty");
+			await gateway.notifyPhone(text);
+			return { sent: true };
+		}
+	});
+}
+//#endregion
+//#region lib/types/projection.js
+/**
+* Duty-session marker projection: the host folds every session log for
+* `user/message` events injected from the phone (source plugin
+* `telegram-duty`), and the resulting `telegramDuty` value rides the standard
+* session.list projections block down to the web client, where the sidebar
+* "值班" button uses it to find the duty session id without reading plugin
+* settings (the web settings wire is allowlisted).
+* @module @luzhengyangtx/dsh-telegram-duty/projection
+*/
+/** True when the event is a phone-injected user message into the duty session. */
+function isDutySourceEvent(event) {
+	if (event.type !== "user/message") return false;
+	const source = event.data.source;
+	return source.kind === "plugin" && source.plugin === "telegram-duty";
+}
+/**
+* The projection unit: an idempotent latch — once a session has any
+* duty-sourced message, it stays marked. Targeted deliveries use a different
+* source plugin name, so they never mark other sessions.
+*/
+function telegramDutyProjection() {
+	return {
+		key: "telegramDuty",
+		stateSchema: z$1.boolean(),
+		init: () => false,
+		apply: (state, event) => {
+			if (state) return state;
+			return isDutySourceEvent(event) ? true : state;
+		},
+		wire: {
+			viewSchema: z$1.boolean().optional(),
+			view: (state) => state
+		},
+		stateVersion: 1
+	};
+}
+//#endregion
+//#region lib/types/index.js
+/**
+* Telegram duty gateway for DeepSeek Harness.
+*
+* Mounts a Telegram long-poll listener; whitelisted messages are delivered
+* into a dedicated "duty" DSH session and wake its agent, and the final
+* assistant text is replied to Telegram. While the gateway is in `duty` mode,
+* approval requests from ALL sessions are forwarded to Telegram instead of the
+* web UI; in `local` mode the web approval popup behaves normally.
+* @module @luzhengyangtx/dsh-telegram-duty
+*/
+const name = "telegram-duty";
+const inject = [
+	"settings",
+	"agents",
+	"agentDefaultModel",
+	"tools",
+	"commands"
+];
+/** Schema values win; empty token/chatId fall back to the credentials file. */
+function resolveRuntime(config) {
+	const resolved = resolveConfig(config);
+	let credentials = {};
+	if (resolved.credentialsFile) try {
+		credentials = JSON.parse(fs.readFileSync(resolved.credentialsFile, "utf-8"));
+	} catch {}
+	return {
+		...resolved,
+		token: resolved.token || credentials.token || "",
+		chatId: resolved.chatId || credentials.chat_id || 0
+	};
+}
+/** Fill generic defaults for the two paths that must exist at runtime. */
+function effectiveRuntime(config) {
+	return {
+		...config,
+		dataDir: config.dataDir && config.dataDir !== "" ? config.dataDir : path.join(process.env.DSH_HOME ?? ".", "storages", "telegram-duty"),
+		dutyCwd: config.dutyCwd && config.dutyCwd !== "" ? config.dutyCwd : process.cwd()
+	};
+}
+/** Plugin entry: register settings, then mount the gateway. */
+async function apply(ctx, config = {}) {
+	try {
+		await mount(ctx, config);
+	} catch (error) {
+		try {
+			const resolved = effectiveRuntime(resolveConfig(config));
+			fs.mkdirSync(resolved.dataDir ?? ".", { recursive: true });
+			fs.writeFileSync(`${resolved.dataDir ?? "."}/startup-error.json`, JSON.stringify({
+				time: Date.now(),
+				error: error instanceof Error ? error.stack ?? error.message : String(error)
+			}, null, 2), "utf-8");
+		} catch {}
+		throw error;
+	}
+}
+function mount(ctx, config) {
+	const settings = ctx.settings.register(TELEGRAM_DUTY_NAMESPACE, Config, {
+		base: config,
+		applies: "live",
+		validate: (value) => {
+			resolveConfig(value);
+		}
+	});
+	const stateOn = ctx.settings.register(DUTY_STATE_ON_NAMESPACE, StateMarkerConfig, { applies: "live" });
+	const stateOff = ctx.settings.register(DUTY_STATE_OFF_NAMESPACE, StateMarkerConfig, { applies: "live" });
+	const runtime = effectiveRuntime(resolveRuntime(settings.get()));
+	if (!runtime.token) throw new Error("telegram-duty: token is required (set it in the patch config or in credentialsFile)");
+	if (!runtime.chatId) throw new Error("telegram-duty: chatId is required (set it in the patch config or in credentialsFile)");
+	ctx.logger.info("telegram-duty", `config ready: sessionId=${runtime.sessionId} chatId=${runtime.chatId} dutyCwd=${runtime.dutyCwd} watchMode=${runtime.watchMode} dataDir=${runtime.dataDir} approvalTimeoutMinutes=${runtime.approvalTimeoutMinutes}`);
+	try {
+		fs.mkdirSync(runtime.dataDir ?? "", { recursive: true });
+		fs.writeFileSync(`${runtime.dataDir ?? "."}/startup.json`, JSON.stringify({
+			time: Date.now(),
+			sessionId: runtime.sessionId,
+			chatId: runtime.chatId
+		}, null, 2), "utf-8");
+	} catch (error) {
+		ctx.logger.warn("telegram-duty", `could not write startup marker: ${error instanceof Error ? error.message : String(error)}`);
+	}
+	const client = new TelegramClient(runtime.token, runtime.proxy ?? "");
+	const gateway = new Gateway({
+		ctx,
+		runtime,
+		client,
+		settings,
+		stateOn,
+		stateOff
+	});
+	ctx.effect(function* () {
+		ctx.on("approval/request", gateway.onApprovalRequest, { prepend: true });
+		ctx.on("session/event", gateway.onSessionEvent);
+		ctx.on("session/event", gateway.watch.onSessionEvent);
+		ctx.on("agent/status", gateway.watch.onAgentStatus);
+		ctx.on("agent/disposed", gateway.watch.onAgentDisposed);
+		ctx.tools.register(telegramAskTool(gateway));
+		ctx.tools.register(telegramNotifyTool(gateway));
+		ctx.commands.register({
+			name: "duty-mode",
+			description: "Show the Telegram duty state (local / duty)",
+			recordInput: false,
+			handler: async () => {
+				await gateway.refreshStateMarker();
+				return { kind: "success" };
+			}
+		});
+		ctx.commands.register({
+			name: "duty-mode-local",
+			description: "Switch the Telegram duty back to local mode",
+			recordInput: false,
+			handler: async () => {
+				await gateway.switchToLocal();
+				return { kind: "success" };
+			}
+		});
+		ctx.commands.register({
+			name: "duty-mode-duty",
+			description: "Switch the Telegram duty on (web sidebar button)",
+			recordInput: false,
+			handler: async () => {
+				await gateway.switchToDuty();
+				return { kind: "success" };
+			}
+		});
+		ctx.commands.register({
+			name: "duty-session",
+			description: "Attach the Telegram duty session (sidebar button fallback)",
+			recordInput: false,
+			handler: async () => {
+				const result = await gateway.ensureDutyLive();
+				if (result.error !== void 0) ctx.logger.warn("telegram-duty", `duty-session command failed: ${result.error}`);
+				return { kind: "success" };
+			}
+		});
+		gateway.start();
+		yield async () => {
+			gateway.watch.dispose();
+			await gateway.stop();
+		};
+	}, "telegram-duty lifecycle");
+	ctx.inject(["sessionProjections"], (projectionCtx) => {
+		projectionCtx.sessionProjections.register(telegramDutyProjection());
+	});
+	ctx.inject(["systemPrompt"], (promptCtx) => {
+		promptCtx.systemPrompt.context({
+			name: "telegram-duty:phone-tools",
+			order: 115,
+			text: () => stringsFor(settings.get().language ?? "en").promptNote
+		});
+	});
+	client.getMe().then((res) => {
+		if (res.ok) ctx.logger.info("telegram-duty", `Telegram bot connected: @${res.result?.username ?? res.result?.first_name ?? "unknown"}`);
+		else ctx.logger.warn("telegram-duty", `getMe rejected: ${res.description ?? "unknown error"}`);
+	}, (error) => {
+		ctx.logger.warn("telegram-duty", `getMe failed: ${error instanceof Error ? error.message : String(error)}`);
+	});
+	return Promise.resolve();
+}
+//#endregion
+export { apply, effectiveRuntime, inject, name, resolveRuntime };

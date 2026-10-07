@@ -1,0 +1,44 @@
+{
+  "menu": [
+    {
+      "command": "help",
+      "description": "命令列表"
+    },
+    {
+      "command": "status",
+      "description": "harness 状态"
+    },
+    {
+      "command": "agents",
+      "description": "列出会话"
+    },
+    {
+      "command": "agent",
+      "description": "选择会话"
+    },
+    {
+      "command": "jobs",
+      "description": "后台任务"
+    },
+    {
+      "command": "kill",
+      "description": "停止任务"
+    },
+    {
+      "command": "cancel",
+      "description": "取消回合"
+    },
+    {
+      "command": "watch",
+      "description": "开启实时转发"
+    },
+    {
+      "command": "unwatch",
+      "description": "关闭实时转发"
+    },
+    {
+      "command": "chatid",
+      "description": "查看 chat id"
+    }
+  ]
+}

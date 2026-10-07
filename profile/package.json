@@ -2,14 +2,20 @@
   "name": "dsh-profile-web",
   "private": true,
   "dependencies": {
-    "@luzhengyangtx/dsh-telegram-duty": "^0.5.0"
+    "@luzhengyangtx/dsh-telegram-duty": "^0.5.0",
+    "dsh-addons-manager": "file:/opt/dsh-plugins/dsh-addons-manager",
+    "dsh-arabic": "file:/opt/dsh-plugins/dsh-arabic",
+    "dsh-rtl": "file:/opt/dsh-plugins/dsh-rtl"
   },
   "dsh": {
     "profile": {
       "bundles": [
         "@deepseek-ai/dsh-base",
         "@deepseek-ai/dsh-web-app",
-        "@luzhengyangtx/dsh-telegram-duty"
+        "@luzhengyangtx/dsh-telegram-duty",
+        "dsh-addons-manager",
+        "dsh-arabic",
+        "dsh-rtl"
       ],
       "patchReload": "startup"
     }

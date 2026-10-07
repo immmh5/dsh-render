@@ -1,0 +1,40 @@
+/**
+ * Telegram duty gateway configuration. Explicit values in this schema
+ * (settings / patch row config) always win; an optional `credentialsFile`
+ * can supply token / chat_id / proxy defaults.
+ * @module @luzhengyangtx/dsh-telegram-duty/config
+ */
+import z from '@deepseek-ai/schemastery';
+/** Settings document namespace owned by this plugin. */
+export const TELEGRAM_DUTY_NAMESPACE = 'telegram-duty';
+export const DUTY_STATE_ON_NAMESPACE = 'telegram-duty-on';
+export const DUTY_STATE_OFF_NAMESPACE = 'telegram-duty-off';
+/**
+ * State-marker namespaces: the web settings wire is allowlisted, so the
+ * browser half cannot READ this plugin's configuration namespace. Instead the
+ * host writes a timestamp into the marker namespace matching the current watch
+ * mode; the forwarded `settings/document-updated` event carries the namespace
+ * name verbatim, and the banner derives the mode from WHICH marker moved.
+ */
+/** Trivial schema for the state-marker sections. */
+export const StateMarkerConfig = z.object({
+    n: z.number().default(0),
+});
+export const Config = z.object({
+    token: z.string().role('secret').default(''),
+    chatId: z.number().default(0),
+    proxy: z.string().default(''),
+    sessionId: z.string().default('telegram-duty'),
+    dutyCwd: z.string().default(''),
+    approvalTimeoutMinutes: z.number().default(10),
+    watchMode: z.union([z.const('local'), z.const('duty')]).default('local'),
+    language: z.union([z.const('zh'), z.const('en')]).default('en'),
+    dataDir: z.string().default(''),
+    credentialsFile: z.string().default(''),
+    replyChunkChars: z.number().default(3800),
+});
+/** Apply schema defaults (and surface schema errors early). */
+export function resolveConfig(config = {}) {
+    return Config(config);
+}
+//# sourceMappingURL=config.js.map
