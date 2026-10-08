@@ -9,8 +9,8 @@ DSH_PORT="${DSH_PORT:-13080}"
 export NGINX_PORT="$PORT"
 
 # Where dsh keeps settings, sessions, and skills. This is the free plan, so the
-# container filesystem is ephemeral — /data is kept alive in a Supabase Storage
-# bucket by sync.js and restored here on every boot.
+# container filesystem is ephemeral — /data is snapshotted to durable storage by
+# sync.js (GitHub Releases, or Supabase Storage) and restored here on every boot.
 : "${DSH_HOME:=/data}"
 export DSH_HOME
 
@@ -111,18 +111,40 @@ fi
 sed -e "s/__NGINX_PORT__/${PORT}/g" -e "s/__DSH_PORT__/${DSH_PORT}/g" \
   /app/nginx.conf > /tmp/nginx.runtime.conf
 
+# --- Persistence backend ----------------------------------------------------
+# The free plan's filesystem is ephemeral, so DSH_HOME is snapshotted to one of
+# two backends and restored on boot (sync.js picks the first that is fully
+# configured):
+#   * Supabase Storage (SUPABASE_URL/SERVICE_KEY/BUCKET) — per-file REST sync.
+#   * GitHub Releases (GITHUB_TOKEN, repo $GITHUB_STORAGE_REPO) — one gzipped
+#     tarball per snapshot as a release asset. No project/bucket to provision,
+#     and a classic PAT with `repo` scope is enough for a private repo, so this
+#     is what the deployment uses.
 HAVE_SUPA=0
 if [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_SERVICE_KEY:-}" ] && [ -n "${SUPABASE_BUCKET:-}" ]; then
   HAVE_SUPA=1
 fi
+HAVE_GH=0
+if [ -n "${GITHUB_TOKEN:-}" ] && [ -n "${GITHUB_STORAGE_REPO:-}" ]; then
+  HAVE_GH=1
+fi
+HAVE_SYNC=0
+if [ "$HAVE_SUPA" = "1" ] || [ "$HAVE_GH" = "1" ]; then
+  HAVE_SYNC=1
+fi
+if [ "$HAVE_SYNC" = "1" ]; then
+  BACKEND="supabase"
+  [ "$HAVE_GH" = "1" ] && BACKEND="github (${GITHUB_STORAGE_REPO})"
+  [ "$HAVE_SUPA" = "1" ] && BACKEND="supabase (${SUPABASE_BUCKET:-})"
+  echo "[dsh] persistence backend: $BACKEND"
+else
+  echo "[dsh] persistence not configured (set GITHUB_TOKEN + GITHUB_STORAGE_REPO); starting ephemeral"
+fi
 
 # Persistence: restore the last snapshot BEFORE dsh boots, so it reads the
 # settings and sessions it had before the redeploy.
-if [ "$HAVE_SUPA" = "1" ]; then
-  echo "[dsh] restoring state from Supabase bucket ${SUPABASE_BUCKET}"
+if [ "$HAVE_SYNC" = "1" ]; then
   node /app/sync.js restore || echo "[dsh] restore failed; continuing with empty home"
-else
-  echo "[dsh] Supabase not configured; starting with ephemeral storage"
 fi
 
 # Clamp model maxTokens to each provider's real limit. A restored snapshot can
@@ -133,7 +155,7 @@ node /app/sanitize-settings.mjs || true
 
 # Materialize the web profile. This repo is the single source of truth for the
 # profile definition (package.json + cordis.patch.yml, token via the !!js tag,
-# so no secret is committed). profiles/ is excluded from the Supabase sync in
+# so no secret is committed). profiles/ is excluded from the storage sync in
 # both directions, so a restored snapshot can never clobber it. The
 # @deepseek-ai/* packages are supplied by dsh's own module-fallback symlinks
 # created at boot; the third-party plugin (telegram-duty) was installed at
@@ -186,10 +208,11 @@ echo "[dsh] starting: nginx 0.0.0.0:${PORT} -> dsh 127.0.0.1:${DSH_PORT} (truste
 boot_dsh &
 DSH_PID=$!
 
-# Persistence: push state back to Supabase on a timer. dsh writes settings and
+# Persistence: push state back to storage on a timer. dsh writes settings and
 # sessions as you use it; this snapshots them so the next boot restores them.
 # Every 60s, so the last ≤60s of activity is the window a hard redeploy can lose.
-if [ "$HAVE_SUPA" = "1" ]; then
+# sync.js short-circuits when nothing changed, so the tick is cheap.
+if [ "$HAVE_SYNC" = "1" ]; then
   (
     while true; do
       sleep 60
@@ -213,7 +236,7 @@ fi
 
 # A last upload when Render sends SIGTERM (a redeploy), so the next boot picks
 # up the very latest state instead of waiting for the 60s tick.
-if [ "$HAVE_SUPA" = "1" ]; then
+if [ "$HAVE_SYNC" = "1" ]; then
   trap 'echo "[dsh] SIGTERM: final sync"; node /app/sync.js sync 2>/dev/null || true; exit 0' TERM INT
 fi
 

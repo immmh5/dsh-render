@@ -62,9 +62,10 @@ RUN chmod +x /opt/dsh-fix/fix-dup-win32-process.sh \
 # nginx bridges Render's public port to dsh on loopback (see start.sh).
 RUN apt-get update && apt-get install -y --no-install-recommends nginx && rm -rf /var/lib/apt/lists/*
 
-# DSH_HOME is kept in a Supabase Storage bucket across redeploys and sleep/wake
-# cycles — sync.js (invoked from start.sh) restores it on boot and uploads it
-# on a timer, since the free plan's filesystem is ephemeral.
+# DSH_HOME is kept in durable storage across redeploys and sleep/wake cycles —
+# sync.js (invoked from start.sh) restores it on boot and uploads it on a timer,
+# since the free plan's filesystem is ephemeral. Backend is chosen by start.sh
+# from env vars (GitHub Releases by default, Supabase Storage if configured).
 ENV DSH_HOME=/data
 ENV HOST=0.0.0.0
 

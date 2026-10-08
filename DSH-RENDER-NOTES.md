@@ -115,7 +115,7 @@ idempotent and never fails the boot — a bad or missing settings.yaml is a
 no-op, and the file keeps its original mode (dsh refuses group-readable
 config).
 
-## Persistence — Supabase Storage (free tier)
+## Persistence — GitHub Releases (free tier)
 
 This service is on the free plan, which has NO persistent disk. Everything dsh
 writes (settings, providers, sessions, conversation history, skills) lives in
@@ -123,34 +123,65 @@ the container's filesystem and is WIPED on every:
   - redeploy (auto-deploy fires on every push to main)
   - sleep/wake (free services sleep after ~15 min of inactivity)
 
-To survive this, `sync.js` mirrors /data into a Supabase Storage bucket:
+To survive this, `sync.js` mirrors /data into a GitHub repo's *Releases*:
 
-  Project:  jzuppyvyhcigmbwcwemn
-  Bucket:   dsh-data
-  Keys are in the service's env vars (SUPABASE_URL / SUPABASE_SERVICE_KEY /
-  SUPABASE_BUCKET).
+  Repo:   https://github.com/immmh5/dsh-storage
+  Asset:  `data.tar.gz` on a release tagged `snapshot-<ISO8601>`
+
+GitHub Releases are used instead of a plain branch because a single gzipped
+tarball asset has no size limit per file (regular repo files are capped at
+100MB), and the whole tree is one object to upload/download — the free plan's
+weak CPU can move the snapshot in one streaming request instead of walking
+thousands of small API calls.
+
+Env vars on the service:
+  - GITHUB_TOKEN          a fine-grained PAT with Contents read+write on
+                          immmh5/dsh-storage (write is needed to create and
+                          prune releases; restore-only would only need read)
+  - GITHUB_STORAGE_REPO   immmh5/dsh-storage
 
 The lifecycle in start.sh:
 
-  1. Restore  — on boot, BEFORE dsh starts, sync.js downloads everything under
-                /data from the bucket. Boots are therefore stateful.
-  2. Upload   — a background loop runs `sync.js sync` every 60s, so the bucket
-                tracks what dsh is writing. A hard kill can lose at most ~60s.
+  1. Restore  — on boot, BEFORE dsh starts, sync.js downloads the newest
+                `data.tar.gz`, extracts it into /data and re-seeds the local
+                change-hash. Boots are therefore stateful.
+  2. Upload   — a background loop runs `sync.js sync` every 60s. A checksum
+                over path+size+mtime of the tree short-circuits the upload when
+                nothing changed, so an idle box makes zero API calls.
   3. SIGTERM  — on a graceful redeploy, one final sync runs before the old
                 container is replaced.
 
-The marker file `data/.snapshot_marker` holds the timestamp of the last upload.
-It is restored-skipped (it only exists to distinguish "empty bucket, fresh
-install" from "nothing synced yet"), and `logs/` / `node_modules` / sqlite
-sidecar files are excluded so the bucket stays small and fast.
+Upload atomicity: the release is created first, the asset is then PUT to it,
+and if the upload throws the release is deleted again — a failed or interrupted
+sync never leaves a half-written snapshot behind that a later boot would
+restore as corrupt state.
 
-NOTE on file modes: dsh refuses to boot if /data/.credentials.yaml is
-group/world readable. Supabase does not store unix modes, so sync.js restores
-dotfiles + yaml/json as 0600 and everything else as 0644. If you add a new
-secret to /data by hand inside the container, `chmod 600` it.
+Change detection: the release body holds `{"sha256": <h>}` where `<h>` is the
+sha256 of the tree fingerprint (path + size + mtime, mtime floored to seconds
+because GNU tar only stores 1-second granularity). On restore, sync.js
+recomputes the fingerprint of the freshly-extracted tree and, if it still
+matches, caches it locally — so the very first sync tick after a boot does not
+re-upload everything that was just downloaded.
 
-If Supabase is ever unreachable the service still boots — restore failures are
+Pruning: `KEEP_RELEASES` (default 5) caps how many snapshots accumulate; when
+exceeded, the oldest release and its tag are deleted. NOTE: pruning deletes
+oldest FIRST regardless of content — never keep test data in the store on a
+live service, or real snapshots get evicted alongside them.
+
+Excluded from the snapshot: `logs/`, `node_modules`, sqlite sidecar files
+(`-wal`/`-shm`), and the `.snapshot_marker`. If you add a new secret to /data
+by hand inside the container, `chmod 600` it — tar preserves modes, so a
+world-readable credentials file would be restored world-readable and dsh would
+refuse to boot.
+
+If GitHub is ever unreachable the service still boots — restore failures are
 non-fatal and it falls back to a fresh empty /data.
+
+Backend selection: `sync.js` picks GitHub when GITHUB_TOKEN + GITHUB_STORAGE_REPO
+are set, else Supabase Storage when SUPABASE_URL + SUPABASE_SERVICE_KEY +
+SUPABASE_BUCKET are set, else runs no-op. If BOTH are configured, the explicit
+Supabase config wins so an existing bucket is never silently abandoned. Only
+one backend should be configured at a time.
 
 ## Keeping the service awake
 
