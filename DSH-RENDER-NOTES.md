@@ -135,9 +135,9 @@ weak CPU can move the snapshot in one streaming request instead of walking
 thousands of small API calls.
 
 Env vars on the service:
-  - GITHUB_TOKEN          a fine-grained PAT with Contents read+write on
-                          immmh5/dsh-storage (write is needed to create and
-                          prune releases; restore-only would only need read)
+  - GITHUB_TOKEN          a classic PAT with `repo` scope on immmh5/dsh-storage
+                          (write is needed to create and prune releases and
+                          their tags; restore-only would only need read)
   - GITHUB_STORAGE_REPO   immmh5/dsh-storage
 
 The lifecycle in start.sh:
@@ -182,6 +182,16 @@ are set, else Supabase Storage when SUPABASE_URL + SUPABASE_SERVICE_KEY +
 SUPABASE_BUCKET are set, else runs no-op. If BOTH are configured, the explicit
 Supabase config wins so an existing bucket is never silently abandoned. Only
 one backend should be configured at a time.
+
+ENV VAR GOTCHA: the Render API endpoint for env vars is a full REPLACE, not an
+upsert — `PUT /v1/services/<id>/env-vars` overwrites the whole set, so a body
+listing only the new keys silently deletes everything else (e.g. the Telegram
+bot token). Read the current set first and send the merged list back in one
+call.
+
+NOTE on the store starting empty: the release store started with zero snapshots
+deliberately, so the service boots as a clean install and the store accumulates
+the service's own state from there. Nothing from a local ~/.dsh is uploaded.
 
 ## Keeping the service awake
 
