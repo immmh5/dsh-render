@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeepSeek Harness — لوحة التحكم</title>
+<link rel="stylesheet" href="/admin/vendor/xterm.min.css">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    min-height: 100vh;
+    background: radial-gradient(1200px 620px at 50% -12%, #17213c 0%, #0b0e14 58%) fixed;
+    color: #e6e9f0;
+    font-family: "Segoe UI", "Noto Sans Arabic", "Helvetica Neue", Arial, sans-serif;
+    padding: 24px 16px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .card {
+    width: 100%;
+    max-width: 880px;
+    background: #141926;
+    border: 1px solid #232b3d;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 22px 64px rgba(0, 0, 0, .48);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+  .mark {
+    display: inline-grid; place-items: center;
+    width: 34px; height: 34px; border-radius: 9px;
+    background: linear-gradient(135deg, #4f8cff, #7c5cff);
+    font-size: 13px; font-weight: 800; letter-spacing: .06em;
+  }
+  h1 { font-size: 19px; margin: 14px 0 4px; }
+  .hint { color: #9aa3b2; font-size: 13px; line-height: 1.7; margin: 0 0 18px; }
+
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .btn {
+    background: #0d1220; color: #e6e9f0;
+    border: 1px solid #232b3d; border-radius: 10px;
+    padding: 10px 16px; font-size: 14px; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+    transition: border-color .15s, filter .15s;
+  }
+  .btn:hover { filter: brightness(1.12); border-color: #35405c; }
+  .btn:disabled { opacity: .5; cursor: default; filter: none; }
+  .btn.primary {
+    background: linear-gradient(135deg, #4f8cff, #7c5cff);
+    border: 0; color: #fff;
+  }
+  .btn.danger { border-color: rgba(255, 107, 107, .45); color: #ff9d9d; }
+  .btn.danger:hover { filter: brightness(1.15); }
+  .btn.fit { margin-inline-start: auto; }
+
+  .status {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #9aa3b2;
+    background: #0d1220; border: 1px solid #232b3d;
+    border-radius: 999px; padding: 7px 14px;
+  }
+  .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #3a4358; flex: none;
+  }
+  .dot.up { background: #43d17c; box-shadow: 0 0 8px rgba(67, 209, 124, .6); }
+  .dot.down { background: #ff6b6b; box-shadow: 0 0 8px rgba(255, 107, 107, .6); }
+  .dot.hold { background: #ffb84d; box-shadow: 0 0 8px rgba(255, 184, 77, .6); }
+
+  #termwrap {
+    margin-top: 16px;
+    background: #0a0d14;
+    border: 1px solid #232b3d;
+    border-radius: 12px;
+    padding: 10px 12px;
+    height: 460px;
+    overflow: hidden;
+    position: relative;
+  }
+  /* xterm needsLTR geometry even inside an RTL page. */
+  #termwrap, #term { direction: ltr; text-align: left; unicode-bidi: isolate; }
+  #term { height: 100%; }
+  #term .xterm-viewport { overflow-y: auto; }
+
+  .log {
+    margin-top: 14px; font-size: 12px; color: #9aa3b2;
+    line-height: 1.75; font-family: ui-monospace, Consolas, monospace;
+    max-height: 120px; overflow: auto; white-space: pre-wrap;
+    background: #0d1220; border: 1px solid #232b3d; border-radius: 10px;
+    padding: 10px 12px; display: none;
+  }
+  .log.show { display: block; }
+  .log .ok { color: #43d17c; }
+  .log .bad { color: #ff8585; }
+  .foot { color: #6b7484; font-size: 12px; margin: 16px 2px 0; line-height: 1.7; }
+  .err-banner {
+    margin-top: 14px; padding: 10px 12px; font-size: 13px; line-height: 1.65;
+    background: rgba(255, 107, 107, .10);
+    border: 1px solid rgba(255, 107, 107, .35);
+    color: #ff8585; border-radius: 10px; display: none;
+  }
+  .err-banner.show { display: block; }
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="brand"><span class="mark">DSH</span> DeepSeek Harness — لوحة التحكم</div>
+  <h1>التحكم بالخادم</h1>
+  <p class="hint">
+    التيرمنال يفتح جلسة شيل مباشرة في الحاوية. زر «إعادة تشغيل DeepSeek» يقتل
+    عملية <code>dsh web</code> فقط، فيقوم الـ watchdog بإعادة إطلاقها خلال
+    ثوانٍ — بدون إعادة تشغيل السيرفر كله.
+  </p>
+
+  <div class="row">
+    <button id="restart" class="btn primary">إعادة تشغيل DeepSeek</button>
+    <button id="stop" class="btn danger">إيقاف DeepSeek</button>
+    <button id="start" class="btn" disabled>تشغيل DeepSeek</button>
+    <span id="status" class="status"><span id="dot" class="dot"></span><span id="statustext">…</span></span>
+  </div>
+
+  <div id="err" class="err-banner"></div>
+  <pre id="log" class="log"></pre>
+
+  <div class="row" style="margin-top:16px">
+    <button id="openterm" class="btn">فتح التيرمنال</button>
+    <button id="fitbtn" class="btn fit">ملاءمة الحجم</button>
+  </div>
+
+  <div id="termwrap">
+    <div id="term"></div>
+  </div>
+
+  <p class="foot">
+    الجلسة محميّة بكلمة المرور نفسها لصفحة الدخول (DSH_WEB_TOKEN) وتُنقل عبر
+    WebSocket على مسار /admin/ws. إغلاق الصفحة ينهي جلسة الشيل فورًا.
+  </p>
+</main>
+<script src="/admin/vendor/xterm.min.js"></script>
+<script src="/admin/vendor/xterm-addon-fit.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var TOKEN = new URLSearchParams(location.search).get('token') || '';
+  var restartBtn = document.getElementById('restart');
+  var stopBtn = document.getElementById('stop');
+  var startBtn = document.getElementById('start');
+  var opentermBtn = document.getElementById('openterm');
+  var fitBtn = document.getElementById('fitbtn');
+  var dot = document.getElementById('dot');
+  var statusText = document.getElementById('statustext');
+  var logEl = document.getElementById('log');
+  var errEl = document.getElementById('err');
+  var termwrap = document.getElementById('termwrap');
+
+  var term = null, fitAddon = null, ws = null, termOpen = false;
+
+  function log(msg, cls) {
+    logEl.classList.add('show');
+    var span = document.createElement('span');
+    if (cls) span.className = cls;
+    span.textContent = new Date().toLocaleTimeString() + '  ' + msg + '\n';
+    logEl.appendChild(span);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function showError(msg) {
+    if (!msg) { errEl.classList.remove('show'); errEl.textContent = ''; return; }
+    errEl.textContent = msg;
+    errEl.classList.add('show');
+  }
+
+  // ---- dsh status polling -------------------------------------------------
+  function api(path, method) {
+    return fetch('/admin/api/' + path + '?token=' + encodeURIComponent(TOKEN), {
+      method: method || 'GET',
+      headers: { 'Cache-Control': 'no-store' }
+    }).then(function (r) {
+      return r.json().catch(function () { return { error: 'bad response' }; })
+        .then(function (body) { return { ok: r.ok, status: r.status, body: body }; });
+    });
+  }
+
+  function refreshStatus() {
+    return api('status').then(function (r) {
+      if (!r.ok) {
+        dot.className = 'dot';
+        statusText.textContent = 'تعذّر قراءة الحالة';
+        return;
+      }
+      var running = !!r.body.running, held = !!r.body.held;
+      dot.className = 'dot ' + (held ? 'hold' : running ? 'up' : 'down');
+      statusText.textContent = held
+        ? 'DeepSeek متوقّف (يدويًا)'
+        : running
+          ? 'DeepSeek يعمل' + (r.body.pid ? ' · PID ' + r.body.pid : '')
+          : 'DeepSeek متوقّف';
+      startBtn.disabled = !held;
+      stopBtn.disabled = !running || held;
+      restartBtn.disabled = !running;
+    });
+  }
+
+  // ---- terminal -----------------------------------------------------------
+  function openTerminal() {
+    if (termOpen) { term.focus(); return; }
+    termOpen = true;
+
+    term = new Terminal({
+      cursorBlink: true,
+      fontFamily: 'ui-monospace, "Cascadia Code", Consolas, monospace',
+      fontSize: 13,
+      scrollback: 5000,
+      allowProposedApi: true
+    });
+    fitAddon = new FitAddon.FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(document.getElementById('term'));
+    try { fitAddon.fit(); } catch (e) {}
+
+    var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var url = proto + '//' + location.host + '/admin/ws?token=' + encodeURIComponent(TOKEN);
+    ws = new WebSocket(url);
+
+    ws.onopen = function () {
+      log('terminal connected');
+      sendResize();
+    };
+    ws.onmessage = function (e) { term.write(e.data); };
+    ws.onerror = function () { log('terminal socket error', 'bad'); };
+    ws.onclose = function (e) {
+      log('terminal closed (code ' + e.code + ')');
+      termOpen = false;
+    };
+
+    function sendResize() {
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      try {
+        var d = fitAddon.proposeDimensions();
+        if (d) ws.send(JSON.stringify({ type: 'resize', cols: d.cols, rows: d.rows }));
+      } catch (e) {}
+    }
+
+    term.onData(function (data) {
+      if (ws && ws.readyState === WebSocket.OPEN) ws.send(data);
+    });
+    term.onResize(sendResize);
+
+    // Refit when the container resizes.
+    if (window.ResizeObserver && termwrap) {
+      new ResizeObserver(function () {
+        if (termOpen) { try { fitAddon.fit(); } catch (e) {} }
+      }).observe(termwrap);
+    }
+
+    term.focus();
+  }
+
+  // ---- controls -----------------------------------------------------------
+  restartBtn.addEventListener('click', function () {
+    restartBtn.disabled = true;
+    restartBtn.textContent = 'جارٍ الإيقاف…';
+    api('restart', 'POST').then(function (r) {
+      restartBtn.textContent = 'إعادة تشغيل DeepSeek';
+      if (r.ok && r.body.ok !== false) {
+        log('restart: ' + (r.body.note || 'killed; watchdog relaunching'), 'ok');
+      } else {
+        log('restart failed: ' + (r.body && (r.body.error || r.body.message) || 'unknown'), 'bad');
+      }
+      setTimeout(refreshStatus, 2500);
+      setTimeout(refreshStatus, 6000);
+    });
+  });
+
+  stopBtn.addEventListener('click', function () {
+    if (!confirm('إيقاف DeepSeek الآن؟ يبقى متوقّفًا حتى تضغط «تشغيل DeepSeek».')) return;
+    stopBtn.disabled = true;
+    stopBtn.textContent = 'جارٍ الإيقاف…';
+    api('stop', 'POST').then(function (r) {
+      stopBtn.textContent = 'إيقاف DeepSeek';
+      if (r.ok) {
+        log('stop: ' + (r.body.note || 'done'), 'ok');
+      } else {
+        log('stop failed: ' + (r.body && r.body.error) || 'unknown', 'bad');
+      }
+      setTimeout(refreshStatus, 2500);
+    });
+  });
+
+  startBtn.addEventListener('click', function () {
+    startBtn.disabled = true;
+    startBtn.textContent = 'جارٍ التشغيل…';
+    api('start', 'POST').then(function (r) {
+      startBtn.textContent = 'تشغيل DeepSeek';
+      if (r.ok) {
+        log('start: ' + (r.body.note || 'released'), 'ok');
+      } else {
+        log('start failed: ' + (r.body && r.body.error) || 'unknown', 'bad');
+      }
+      setTimeout(refreshStatus, 3000);
+      setTimeout(refreshStatus, 7000);
+    });
+  });
+
+  opentermBtn.addEventListener('click', openTerminal);
+  fitBtn.addEventListener('click', function () {
+    if (termOpen) { try { fitAddon.fit(); } catch (e) {} }
+  });
+
+  // Auto-open the terminal on load — that is the primary reason people come here.
+  refreshStatus().then(openTerminal);
+  setInterval(refreshStatus, 10000);
+})();
+</script>
+</body>
+</html>

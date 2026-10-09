@@ -6,6 +6,9 @@ set -e
 # to avoid exposing remote code execution to the network).
 : "${PORT:=3080}"
 DSH_PORT="${DSH_PORT:-13080}"
+# The admin sidecar (web terminal + dsh controls) runs on its own loopback port
+# so it survives `dsh web` restarts. nginx proxies /admin to it.
+ADMIN_PORT="${DSH_ADMIN_PORT:-13081}"
 export NGINX_PORT="$PORT"
 
 # Where dsh keeps settings, sessions, and skills. This is the free plan, so the
@@ -59,7 +62,9 @@ if command -v git >/dev/null 2>&1; then
 fi
 if [ -d /opt/dsh-repo ]; then
   for f in nginx.conf sync.js sanitize-settings.mjs login/index.html \
-           login/booting.html profile/package.json profile/cordis.patch.yml; do
+           login/booting.html profile/package.json profile/cordis.patch.yml \
+           admin/server.js admin/index.html admin/vendor/xterm.min.js \
+           admin/vendor/xterm.min.css admin/vendor/xterm-addon-fit.min.js; do
     if [ -f "/opt/dsh-repo/$f" ]; then
       mkdir -p "/app/$(dirname "$f")"
       cp -f "/opt/dsh-repo/$f" "/app/$f" || true
@@ -109,7 +114,51 @@ fi
 # nginx.conf has placeholders (nginx cannot expand env vars in listen/
 # proxy_pass), so render the real config here and hand nginx the result.
 sed -e "s/__NGINX_PORT__/${PORT}/g" -e "s/__DSH_PORT__/${DSH_PORT}/g" \
-  /app/nginx.conf > /tmp/nginx.runtime.conf
+    -e "s/__ADMIN_PORT__/${ADMIN_PORT}/g" \
+    /app/nginx.conf > /tmp/nginx.runtime.conf
+
+# --- Admin sidecar ----------------------------------------------------------
+# A tiny HTTP+WS server (/app/admin) that serves a web terminal and
+# start/stop/restart controls for `dsh web`. It is deliberately a SEPARATE
+# process from dsh: some updates need a hard dsh restart, and once dsh is down
+# (or refusing to boot) there is no UI left to bring it back short of a full
+# Render redeploy. The panel is reachable through nginx's /admin location and
+# gates every request on the same DSH_WEB_TOKEN the login page uses.
+#
+# Watchdog: if the sidecar exits, restart it — the panel must outlive dsh. It
+# also watches /app/admin/server.js for changes: the self-update step below
+# syncs the panel from the repo, so a panel update lands on the next watchdog
+# tick with no image rebuild and no manual restart.
+start_admin() {
+  while true; do
+    # Run the sidecar as a direct child (no pipe) so $! is node itself —
+    # that's what the update watcher below has to kill to reload it.
+    DSH_ADMIN_PORT="$ADMIN_PORT" DSH_PORT="$DSH_PORT" \
+      node /app/admin/server.js &
+    ADMIN_PID=$!
+
+    # Watch for code updates: the self-update step syncs /app/admin from the
+    # repo, and this kill is what makes a panel edit land without a rebuild.
+    # Stamp the launch time once, then any newer server.js triggers a reload.
+    touch /tmp/admin.stamp
+    while kill -0 "$ADMIN_PID" 2>/dev/null; do
+      if [ /app/admin/server.js -nt /tmp/admin.stamp ]; then
+        echo "[dsh] admin: server.js updated; reloading sidecar"
+        kill "$ADMIN_PID" 2>/dev/null || true
+        break
+      fi
+      sleep 10
+    done
+    # `set -e` is active: a killed child makes wait return non-zero, which
+    # must not take the whole script down with it.
+    wait "$ADMIN_PID" 2>/dev/null || true
+
+    echo "[dsh] admin: sidecar exited; restarting in 5s"
+    sleep 5
+  done
+}
+
+start_admin &
 
 # --- Persistence backend ----------------------------------------------------
 # The free plan's filesystem is ephemeral, so DSH_HOME is snapshotted to one of
@@ -206,6 +255,10 @@ boot_dsh() {
 echo "[dsh] starting: nginx 0.0.0.0:${PORT} -> dsh 127.0.0.1:${DSH_PORT} (trusted: ${TRUSTED:-none})"
 
 boot_dsh &
+
+# Record dsh's PID for the admin sidecar (stop/restart), and write it fresh on
+# every (re)launch below so the file never points at a recycled PID.
+echo "$!" > /tmp/dsh.pid
 DSH_PID=$!
 
 # Persistence: push state back to storage on a timer. dsh writes settings and
@@ -222,12 +275,22 @@ if [ "$HAVE_SYNC" = "1" ]; then
 fi
 
 # Keep dsh alive: if it crashes, restart it so the UI stays reachable.
+# The admin panel can ask for a deliberate stop (touching /tmp/dsh.hold first);
+# while that marker exists we must NOT relaunch — the hold is the only thing
+# that keeps a maintenance stop from being instantly undone by this loop.
 (
   while true; do
     if ! kill -0 "$DSH_PID" 2>/dev/null; then
+      if [ -e /tmp/dsh.hold ]; then
+        # Panel-driven maintenance stop: wait it out. Poll rather than sleep
+        # once so a slow `stop` command can't collide with the 15s tick.
+        sleep 5
+        continue
+      fi
       echo "[dsh] process exited; restarting in 5s"
       sleep 5
       boot_dsh &
+      echo "$!" > /tmp/dsh.pid
       DSH_PID=$!
     fi
     sleep 15

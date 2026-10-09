@@ -66,6 +66,13 @@
   }
   .submit:hover { filter: brightness(1.08); }
   .submit:disabled { opacity: .65; cursor: default; }
+  .secondary {
+    width: 100%; margin-top: 10px;
+    background: #0d1220; color: #c7d0e0;
+    border: 1px solid #232b3d; border-radius: 10px;
+    padding: 11px 16px; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .secondary:hover { color: #e6e9f0; border-color: #3a4560; filter: brightness(1.15); }
   .err {
     margin: 14px 0 0; padding: 10px 12px;
     background: rgba(255, 107, 107, .10);
@@ -92,6 +99,9 @@
       </span>
     </label>
     <button type="submit" class="submit">دخول</button>
+    <button type="button" id="admin" class="secondary">
+      🔧 لوحة التحكم — تيرمنال وإعادة تشغيل
+    </button>
     <p id="err" class="err" hidden>
       كلمة المرور غير صحيحة. أعد المحاولة.
     </p>
@@ -133,6 +143,21 @@
 
   // وجود بارامتر token في العنوان وأنا أعرض صفحة الدخول يعني أن الكود لم يصحّ.
   if (new URLSearchParams(location.search).has('token')) err.hidden = false;
+
+  // زر لوحة التحكم يفتح التيرمنال وأدوات إدارة dsh في صفحة مستقلّة، باستخدام
+  // كلمة المرور نفسها. اللوحة تعمل حتى لو كان dsh متوقفًا (السيرفر الجانبي
+  // مستقل)، فتظل قادرًا على إعادته من هنا دون إعادة نشر كاملة.
+  document.getElementById('admin').addEventListener('click', function () {
+    var code = clean(input.value);
+    if (!code) {
+      err.textContent = 'اكتب كلمة المرور أولاً لفتح لوحة التحكم.';
+      err.hidden = false;
+      input.focus();
+      return;
+    }
+    location.href = '/admin/?token=' + encodeURIComponent(code);
+  });
+
   input.focus();
 })();
 </script>

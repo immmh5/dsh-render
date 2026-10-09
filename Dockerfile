@@ -123,8 +123,15 @@ COPY sync.js /app/sync.js
 COPY sanitize-settings.mjs /app/sanitize-settings.mjs
 COPY login/index.html /app/login/index.html
 COPY login/booting.html /app/login/booting.html
+# The admin control panel: a web terminal + dsh start/stop/restart controls,
+# served by an independent sidecar process so it stays reachable while dsh
+# itself is restarting. See start.sh and /app/admin/server.js.
+COPY admin/ /app/admin/
 COPY profile/package.json /app/profile/package.json
 COPY profile/cordis.patch.yml /app/profile/cordis.patch.yml
-RUN chmod 644 /app/login/index.html /app/login/booting.html && chmod +x /usr/local/bin/start.sh
+RUN chmod 644 /app/login/index.html /app/login/booting.html \
+  && chmod 755 /app/admin \
+  && chmod 644 /app/admin/server.js /app/admin/index.html /app/admin/vendor/* \
+  && chmod +x /usr/local/bin/start.sh
 
 CMD ["/usr/local/bin/start.sh"]
